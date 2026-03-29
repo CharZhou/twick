@@ -47,6 +47,15 @@ import { ANIMATIONS } from "./helpers/animation-manager";
 import { TEXT_EFFECTS } from "./helpers/text-effects-manager";
 import useTimelineControl from "./hooks/use-timeline-control";
 import { setElementColors } from "./helpers/editor.utils";  
+import {
+  TwickI18nProvider,
+  useTwickI18n,
+} from "./i18n/i18n-context";
+import type {
+  TwickLanguagePreference,
+  TwickLocale,
+  TwickTranslationKey,
+} from "./i18n/translations";
 
 export { setElementColors };
 
@@ -64,6 +73,11 @@ export type {
   AssetPaginated,
 };
 export type { PlayerControlsProps, VideoEditorProps, VideoEditorConfig, TimelineTickConfig, TimelineZoomConfig, CanvasConfig };
+export type {
+  TwickLanguagePreference,
+  TwickLocale,
+  TwickTranslationKey,
+};
 
 export { throttle, debounce } from "./helpers/function.utils";
 // Constants and configurations
@@ -79,7 +93,9 @@ export {
   getAnimationGif, 
   PlayerControls, 
   TimelineManager, 
-  useTimelineControl 
+  useTimelineControl,
+  TwickI18nProvider,
+  useTwickI18n,
 };
 
 // Utilities and constants

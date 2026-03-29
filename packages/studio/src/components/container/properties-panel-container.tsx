@@ -19,12 +19,15 @@ import { PlaybackPropsPanel } from "../properties/playback-props";
 import { GenerateCaptionsPanel } from "../properties/generate-captions.tsx";
 import { TextPropsPanel } from "../properties/text-props";
 import { AnnotationStylePanel } from "../properties/annotation-style-panel";
+import { DigitalHumanPropsPanel } from "../properties/digital-human-props";
 import { ICaptionGenerationPollingResponse, CaptionEntry } from "../../types";
 import { useCallback } from "react";
+import { useTwickI18n } from "@twick/video-editor";
 
 const DEFAULT_CANVAS_BACKGROUND = "#000000";
 
 interface PropertiesPanelContainerProps {
+  selectedTool: string;
   selectedElement: TrackElement | null;
   updateElement: (element: TrackElement) => void;
   addCaptionsToTimeline: (captions: CaptionEntry[]) => void;
@@ -35,6 +38,7 @@ interface PropertiesPanelContainerProps {
 }
 
 export function PropertiesPanelContainer({
+  selectedTool,
   selectedElement,
   updateElement,
   addCaptionsToTimeline,
@@ -43,6 +47,7 @@ export function PropertiesPanelContainer({
   pollingIntervalMs,
   videoResolution,
 }: PropertiesPanelContainerProps) {
+  const { t } = useTwickI18n();
   const { editor, present } = useTimelineContext();
   const backgroundColor =
     present?.backgroundColor ??
@@ -58,28 +63,48 @@ export function PropertiesPanelContainer({
 
   const annotationTitle =
     selectedElement instanceof ArrowElement
-      ? "Arrow callout"
+      ? t("properties.arrowCallout")
       : selectedElement instanceof LineElement
-        ? "Line"
+        ? t("properties.line")
         : selectedElement instanceof RectElement
-          ? "Box"
+          ? t("properties.box")
           : selectedElement instanceof CircleElement
-            ? "Circle"
+            ? t("properties.circle")
             : null;
+  const localizedTypeTitleByType: Record<string, string> = {
+    video: t("toolbar.video"),
+    image: t("toolbar.image"),
+    audio: t("toolbar.audio"),
+    text: t("toolbar.text"),
+    caption: t("toolbar.caption"),
+    rect: t("properties.box"),
+    circle: t("properties.circle"),
+    line: t("properties.line"),
+    arrow: t("properties.arrowCallout"),
+    effect: t("toolbar.effect"),
+  };
+  const localizedTypeTitle = selectedElement
+    ? localizedTypeTitleByType[selectedElement.getType()]
+    : null;
   const title = annotationTitle
     ?? (selectedElement instanceof TextElement ? selectedElement.getText() : null)
     ?? selectedElement?.getName()
-    ?? selectedElement?.getType()
-    ?? "Element";
+    ?? localizedTypeTitle
+    ?? t("properties.element");
 
   return (
-    <aside className="properties-panel" aria-label="Element properties inspector">
+    <aside className="properties-panel" aria-label={t("properties.inspectorAria")}>
       <div className="properties-header">
+        {!selectedElement && selectedTool === "digital-human" && (
+          <h3 className="properties-title">{t("digitalHuman.title")}</h3>
+        )}
         {!selectedElement && (
-          <h3 className="properties-title">Composition</h3>
+          selectedTool === "digital-human" ? null : (
+            <h3 className="properties-title">{t("properties.composition")}</h3>
+          )
         )}
         {selectedElement && selectedElement.getType() === "caption" && (
-          <h3 className="properties-title">Caption</h3>
+          <h3 className="properties-title">{t("properties.caption")}</h3>
         )}
         {selectedElement && selectedElement.getType() !== "caption" && (
           <h3 className="properties-title">
@@ -89,19 +114,23 @@ export function PropertiesPanelContainer({
       </div>
 
       <div className="prop-content">
+        {!selectedElement && selectedTool === "digital-human" && (
+          <DigitalHumanPropsPanel />
+        )}
+
         {/* Composition inspector when nothing selected */}
-        {!selectedElement && (
+        {!selectedElement && selectedTool !== "digital-human" && (
           <div className="panel-container">
-            <div className="panel-title">Canvas & Render</div>
+            <div className="panel-title">{t("properties.canvasRender")}</div>
             <div className="properties-group">
               <div className="property-section">
-                <span className="property-label">Size</span>
+                <span className="property-label">{t("properties.size")}</span>
                 <span className="properties-size-readonly">
                   {videoResolution.width} × {videoResolution.height}
                 </span>
               </div>
               <div className="color-control">
-                <label className="label-small">Background Color</label>
+                <label className="label-small">{t("properties.backgroundColor")}</label>
                 <div className="color-inputs">
                   <input
                     type="color"

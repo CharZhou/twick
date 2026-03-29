@@ -10,11 +10,13 @@ import { EffectStylePanelContainer } from "./effect-style-panel-container";
 import { Wand2 } from "lucide-react";
 import { CaptionsPanelContainer } from "./captions-panel-container";
 import { GenerateMediaPanelContainer } from "./generate-media-panel-container";
+import { DigitalHumanPanelContainer } from "./digital-human-panel-container";
 import { TemplateGalleryPanel } from "../panel/template-gallery-panel";
 import { RecordPanel } from "../panel/record-panel";
 import { AnnotationsPanel } from "../panel/annotations-panel";
 import { ChaptersPanel } from "../panel/chapters-panel";
 import { ScriptPanel } from "../panel/script-panel";
+import { useTwickI18n } from "@twick/video-editor";
 
 /**
  * Props interface for the ElementPanelContainer component.
@@ -62,6 +64,7 @@ const ElementPanelContainer = ({
   uploadConfig,
   studioConfig,
 }: ElementPanelContainerProps): React.ReactElement => {
+  const { t } = useTwickI18n();
   const addNewElement = async (element: TrackElement) => {
     await addElement(element);
   };
@@ -151,6 +154,16 @@ const ElementPanelContainer = ({
             studioConfig={studioConfig}
           />
         );
+      case "digital-human":
+        return (
+          <DigitalHumanPanelContainer
+            videoResolution={videoResolution}
+            selectedElement={selectedElement}
+            addElement={addNewElement}
+            updateElement={updateElement}
+            studioConfig={studioConfig}
+          />
+        );
       case "templates":
         return <TemplateGalleryPanel studioConfig={studioConfig} />;
       case "record":
@@ -211,7 +224,9 @@ const ElementPanelContainer = ({
             <div className="empty-state">
               <div className="empty-state-content">
                 <Wand2 className="empty-state-icon" />
-                <p className="empty-state-text">Select an element from toolbar</p>
+                <p className="empty-state-text">
+                  {t("asset.selectElementFromToolbar")}
+                </p>
               </div>
             </div>
           </div>

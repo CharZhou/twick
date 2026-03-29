@@ -54,6 +54,87 @@ export interface IVideoGenerationService {
   getAvailableModels?: () => ModelInfo[];
 }
 
+export interface DigitalHumanFigure {
+  type: "whole_body" | "circle_view" | "sit_body" | string;
+  cover: string;
+  width: number;
+  height: number;
+  previewVideoUrl?: string;
+  canReplaceBackground?: boolean;
+}
+
+export interface DigitalHumanVoiceOption {
+  id: string;
+  name: string;
+  gender?: string;
+  language?: string;
+  speed?: number;
+  pitch?: number;
+  auditionUrl?: string;
+  description?: string;
+}
+
+export interface DigitalHumanAsset {
+  id: string;
+  name: string;
+  gender?: string;
+  figures: DigitalHumanFigure[];
+  defaultVoice?: DigitalHumanVoiceOption;
+  tags?: string[];
+  tagIds?: number[];
+  supports4k?: boolean;
+}
+
+export interface ListDigitalHumansParams {
+  page?: number;
+  size?: number;
+  source?: number;
+  tagIds?: number[];
+}
+
+export interface CreateDigitalHumanVideoParams {
+  digitalHumanId: string;
+  figureType: string;
+  figureWidth?: number;
+  figureHeight?: number;
+  script: string;
+  voiceId?: string;
+  speed?: number;
+  backgroundColor?: string;
+  showSubtitles?: boolean;
+  speechLanguage?: "cn" | "en";
+  quality?: "standard" | "pro";
+  videoResolution: {
+    width: number;
+    height: number;
+  };
+}
+
+export interface DigitalHumanGenerationStatus {
+  status: "pending" | "completed" | "failed";
+  progress?: number;
+  error?: string;
+  url?: string;
+  previewUrl?: string;
+  duration?: number;
+  rawStatus?: number;
+}
+
+export interface IDigitalHumanGenerationService {
+  /** List available digital humans that can be used for synthesis. */
+  listDigitalHumans: (
+    params?: ListDigitalHumansParams,
+  ) => Promise<DigitalHumanAsset[]>;
+  /** Optional voice list for richer editing. */
+  listVoices?: () => Promise<DigitalHumanVoiceOption[]>;
+  /** Create a digital human synthesis job and return the created video id. */
+  createVideo: (params: CreateDigitalHumanVideoParams) => Promise<string>;
+  /** Poll the created video id until completed. */
+  getRequestStatus: (videoId: string) => Promise<DigitalHumanGenerationStatus>;
+  /** Polling interval in milliseconds. Defaults to 5000. */
+  pollingIntervalMs?: number;
+}
+
 export interface GenerateVoiceoverParams {
   provider: AIModelProvider;
   endpointId: string;

@@ -187,6 +187,8 @@ export {
 // Utilities and types
 export * from "./helpers/generate-captions.service";
 export * from "./helpers/export-project-bundle";
+export * from "./helpers/aether-upload-config";
+export * from "./helpers/chanjing-digital-human.service";
 export * from "./helpers/constant";
 export * from "./types";
 export type {

@@ -22,6 +22,25 @@ pnpm install
 pnpm dev
 ```
 
+### Chanjing Proxy For Local Dev
+
+The examples app calls the AetherLab BFF directly for Chanjing requests.
+
+By default it derives the Chanjing proxy base URL from the upload API base URL,
+which resolves to:
+
+```txt
+http://localhost:48080/api/third-party/chanjing
+```
+
+If your backend is deployed elsewhere, override it in `packages/examples/.env.local`:
+
+```bash
+VITE_CHANJING_PROXY_BASE_URL=https://your-domain.com/api/third-party/chanjing
+```
+
+You can start from `.env.example`.
+
 ### Build for Production
 
 ```bash

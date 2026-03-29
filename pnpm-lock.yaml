@@ -414,6 +414,9 @@ importers:
       '@twick/studio':
         specifier: workspace:*
         version: link:../studio
+      '@twick/video-editor':
+        specifier: workspace:*
+        version: link:../video-editor
       '@twick/visualizer':
         specifier: workspace:*
         version: link:../visualizer

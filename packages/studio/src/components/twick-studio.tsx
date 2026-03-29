@@ -23,11 +23,12 @@ import ElementPanelContainer from "./container/element-panel-container";
 import { useTimelineContext } from "@twick/timeline";
 import { MediaProvider } from "../context/media-context";
 import { PropertiesPanelContainer } from "./container/properties-panel-container";
-import VideoEditor from "@twick/video-editor";
+import VideoEditor, { TwickI18nProvider } from "@twick/video-editor";
 import { useMemo } from "react";
 import { StudioConfig } from "../types";
 import useStudioOperation from "../hooks/use-studio-operation";
 import { useGenerateCaptions } from "..";
+import { DigitalHumanComposerProvider } from "../context/digital-human-context";
 
 export function TwickStudio({ studioConfig }: { studioConfig?: StudioConfig }) {
   const {
@@ -59,6 +60,10 @@ export function TwickStudio({ studioConfig }: { studioConfig?: StudioConfig }) {
     () => ({
       canvasMode: true,
       ...(studioConfig || {}),
+      hiddenTools: [
+        ...(studioConfig?.hiddenTools || []),
+        ...(studioConfig?.digitalHumanGenerationService ? [] : ["digital-human"]),
+      ],
       videoProps: {
         ...(studioConfig?.videoProps || {}),
         width: videoResolution.width,
@@ -73,70 +78,78 @@ export function TwickStudio({ studioConfig }: { studioConfig?: StudioConfig }) {
   );
 
   return (
-    <MediaProvider>
-      <div className="studio-container">
-        {/* Header */}
-        <StudioHeader
-          setVideoResolution={setVideoResolution}
-          onNewProject={onNewProject}
-          onLoadProject={onLoadProject}
-          onSaveProject={onSaveProject}
-          onExportVideo={onExportVideo}
-          onExportCaptions={onExportCaptions}
-          onExportChapters={onExportChapters}
-        />
-        {/* Main Content */}
-        <div className="studio-content">
-          {/* Left Toolbar */}
-          <Toolbar
-            selectedTool={selectedTool}
-            setSelectedTool={setSelectedTool}
-            customTools={twickStudiConfig.customTools}
-            hiddenTools={twickStudiConfig.hiddenTools}
-          />
-
-          {/* Left Panel (Element Library) */}
-          <div className="studio-left-panel">
-            <ElementPanelContainer
-              videoResolution={videoResolution}
-              selectedTool={selectedTool}
-              setSelectedTool={setSelectedTool}
-              selectedElement={selectedElement}
-              addElement={addElement}
-              updateElement={updateElement}
-              uploadConfig={twickStudiConfig.uploadConfig}
-              studioConfig={twickStudiConfig}
+    <TwickI18nProvider>
+      <MediaProvider>
+        <DigitalHumanComposerProvider
+          studioConfig={twickStudiConfig}
+          videoResolution={videoResolution}
+        >
+          <div className="studio-container">
+            {/* Header */}
+            <StudioHeader
+              setVideoResolution={setVideoResolution}
+              onNewProject={onNewProject}
+              onLoadProject={onLoadProject}
+              onSaveProject={onSaveProject}
+              onExportVideo={onExportVideo}
+              onExportCaptions={onExportCaptions}
+              onExportChapters={onExportChapters}
             />
-          </div>
+            {/* Main Content */}
+            <div className="studio-content">
+              {/* Left Toolbar */}
+              <Toolbar
+                selectedTool={selectedTool}
+                setSelectedTool={setSelectedTool}
+                customTools={twickStudiConfig.customTools}
+                hiddenTools={twickStudiConfig.hiddenTools}
+              />
 
-          {/* Center - Canvas and Transport */}
-          <main className="main-container">
-            <div className="canvas-wrapper">
-              <div
-                className="canvas-container"
-                style={{
-                  maxWidth: twickStudiConfig.playerProps?.maxWidth ?? "100%",
-                }}
-              >
-                <VideoEditor editorConfig={twickStudiConfig} />
+              {/* Left Panel (Element Library) */}
+              <div className="studio-left-panel">
+                <ElementPanelContainer
+                  videoResolution={videoResolution}
+                  selectedTool={selectedTool}
+                  setSelectedTool={setSelectedTool}
+                  selectedElement={selectedElement}
+                  addElement={addElement}
+                  updateElement={updateElement}
+                  uploadConfig={twickStudiConfig.uploadConfig}
+                  studioConfig={twickStudiConfig}
+                />
+              </div>
+
+              {/* Center - Canvas and Transport */}
+              <main className="main-container">
+                <div className="canvas-wrapper">
+                  <div
+                    className="canvas-container"
+                    style={{
+                      maxWidth: twickStudiConfig.playerProps?.maxWidth ?? "100%",
+                    }}
+                  >
+                    <VideoEditor editorConfig={twickStudiConfig} />
+                  </div>
+                </div>
+              </main>
+
+              {/* Right Panel (Inspector + Props Toolbar) */}
+              <div className="studio-right-panel">
+                <PropertiesPanelContainer
+                  selectedTool={selectedTool}
+                  selectedElement={selectedElement}
+                  updateElement={updateElement}
+                  addCaptionsToTimeline={addCaptionsToTimeline}
+                  onGenerateCaptions={onGenerateCaptions}
+                  getCaptionstatus={getCaptionstatus}
+                  pollingIntervalMs={pollingIntervalMs}
+                  videoResolution={videoResolution}
+                />
               </div>
             </div>
-          </main>
-
-          {/* Right Panel (Inspector + Props Toolbar) */}
-          <div className="studio-right-panel">
-            <PropertiesPanelContainer
-              selectedElement={selectedElement}
-              updateElement={updateElement}
-              addCaptionsToTimeline={addCaptionsToTimeline}
-              onGenerateCaptions={onGenerateCaptions}
-              getCaptionstatus={getCaptionstatus}
-              pollingIntervalMs={pollingIntervalMs}
-              videoResolution={videoResolution}
-            />
           </div>
-        </div>
-      </div>
-    </MediaProvider>
+        </DigitalHumanComposerProvider>
+      </MediaProvider>
+    </TwickI18nProvider>
   );
 }

@@ -7,6 +7,13 @@ export type {
   ITranslationService,
   IVoiceoverService,
   IVideoGenerationService,
+  IDigitalHumanGenerationService,
+  DigitalHumanAsset,
+  DigitalHumanFigure,
+  DigitalHumanVoiceOption,
+  CreateDigitalHumanVideoParams,
+  DigitalHumanGenerationStatus,
+  ListDigitalHumansParams,
   GenerateImageParams,
   GenerateVideoParams,
 } from "./generation"
@@ -124,10 +131,20 @@ export interface ICaptionGenerationService {
   pollingIntervalMs?: number;
 }
 
-/** Configuration for cloud media upload (S3 or GCS). Credentials are configured via env on the upload API backend. */
+export type UploadProvider = "s3" | "gcs" | "aether";
+
+/** Configuration for media upload/import integrations. */
 export interface UploadConfig {
   uploadApiUrl: string;
-  provider: "s3" | "gcs";
+  provider: UploadProvider;
+  /** Optional endpoint for importing an external URL into remote storage. */
+  importApiUrl?: string;
+  /** Optional directory prefix used by the remote storage backend. */
+  directory?: string;
+  /** Aether third-party API key, sent as `Authorization: Bearer {apiKey}`. */
+  apiKey?: string;
+  /** Aether third-party user token, sent as `X-User-Token`. */
+  userToken?: string;
 }
 
 export interface ProjectTemplate {
@@ -153,6 +170,8 @@ export interface StudioConfig extends VideoEditorConfig {
   imageGenerationService?: import("./generation").IImageGenerationService;
   /** Video generation service for polling-based async video generation */
   videoGenerationService?: import("./generation").IVideoGenerationService;
+  /** Digital human video generation service. */
+  digitalHumanGenerationService?: import("./generation").IDigitalHumanGenerationService;
   /** Voiceover generation service for narration generation. */
   voiceoverGenerationService?: import("./generation").IVoiceoverService;
   /** Caption translation service for multi-language workflows. */

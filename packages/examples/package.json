@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@twick/studio": "workspace:*",
+    "@twick/video-editor": "workspace:*",
     "@twick/browser-render": "workspace:*",
     "@twick/visualizer": "workspace:*",
     "react": "^19.2.3",
