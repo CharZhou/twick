@@ -19,6 +19,7 @@
 import type { Size } from "@twick/timeline";
 import { Save, Download, Clapperboard, File, Plus, RectangleVertical, RectangleHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTwickI18n, type TwickLanguagePreference } from "@twick/video-editor";
 
 interface StudioHeaderProps {
   setVideoResolution: (resolution: Size) => void;
@@ -36,6 +37,7 @@ export const StudioHeader = ({
   onSaveProject,
   onExportVideo,
 }: StudioHeaderProps) => {
+  const { t, languagePreference, setLanguagePreference } = useTwickI18n();
   const [orientation, setOrientation] = useState<"horizontal" | "vertical">(
     "vertical"
   );
@@ -50,8 +52,7 @@ export const StudioHeader = ({
   const handleOrientationChange = (nextOrientation: "horizontal" | "vertical") => {
     if (nextOrientation === orientation) return;
 
-    const confirmMessage =
-      "Changing orientation will create a new project with the new resolution. Do you want to continue?";
+    const confirmMessage = t("header.confirmOrientationChange");
 
     if (!window.confirm(confirmMessage)) {
       return;
@@ -81,10 +82,10 @@ export const StudioHeader = ({
         </h1>
         <div className="header-separator"></div>
         <div className="flex-container" style={{ gap: "0.5rem" }}>
-          <span className="text-sm opacity-80">Orientation</span>
+          <span className="text-sm opacity-80">{t("header.orientation")}</span>
           <button
             className={`btn-ghost ${orientation === "vertical" ? "btn-primary" : ""}`}
-            title="Portrait (720×1280)"
+            title={t("header.portraitTitle")}
             onClick={() => handleOrientationChange("vertical")}
           >
             <RectangleVertical className="icon-sm" />
@@ -92,38 +93,54 @@ export const StudioHeader = ({
           </button>
           <button
             className={`btn-ghost ${orientation === "horizontal" ? "btn-primary" : ""}`}
-            title="Landscape (1280×720)"
+            title={t("header.landscapeTitle")}
             onClick={() => handleOrientationChange("horizontal")}
           >
             <RectangleHorizontal className="icon-sm" />
 
           </button>
         </div>
+        <div className="flex-container" style={{ gap: "0.5rem" }}>
+          <span className="text-sm opacity-80">{t("i18n.language")}</span>
+          <select
+            className="select-dark"
+            value={languagePreference}
+            onChange={(e) =>
+              setLanguagePreference(e.target.value as TwickLanguagePreference)
+            }
+            aria-label={t("i18n.language")}
+            style={{ minWidth: "7rem" }}
+          >
+            <option value="auto">{t("i18n.languageAuto")}</option>
+            <option value="en">{t("i18n.languageEnglish")}</option>
+            <option value="zh">{t("i18n.languageChinese")}</option>
+          </select>
+        </div>
       </div>
       <div className="flex-container">
         <button
           className="btn-ghost"
-          title="New Project"
+          title={t("header.newProject")}
           onClick={onNewProject}
         >
           <Plus className="icon-sm" />
-          New Project
+          {t("header.newProject")}
         </button>
         <button
           className="btn-ghost"
-          title="Load Project"
+          title={t("header.loadProject")}
           onClick={onLoadProject}
         >
           <File className="icon-sm" />
-          Load Project
+          {t("header.loadProject")}
         </button>
         <button
           className="btn-ghost"
-          title="Save Draft"
+          title={t("header.saveDraft")}
           onClick={onSaveProject}
         >
           <Save className="icon-sm" />
-          Save Draft
+          {t("header.saveDraft")}
         </button>
         {/* <button
           className="btn-ghost"
@@ -159,11 +176,11 @@ export const StudioHeader = ({
         </button> */}
         <button
           className="btn-primary"
-          title="Export"
+          title={t("header.export")}
           onClick={onExportVideo}
         >
           <Download className="icon-sm" />
-          Export
+          {t("header.export")}
         </button>
       </div>
     </header>

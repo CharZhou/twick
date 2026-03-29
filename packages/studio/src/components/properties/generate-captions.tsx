@@ -6,6 +6,7 @@ import {
   CaptionPhraseLength,
   ICaptionGenerationPollingResponse,
 } from "../../types";
+import { useTwickI18n } from "@twick/video-editor";
 
 export function GenerateCaptionsPanel({
   selectedElement,
@@ -26,6 +27,7 @@ export function GenerateCaptionsPanel({
   getCaptionstatus: (reqId: string) => Promise<ICaptionGenerationPollingResponse>;
   pollingIntervalMs?: number;
 }) {
+  const { t } = useTwickI18n();
   const [containsAudio, setContainsAudio] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -84,14 +86,16 @@ export function GenerateCaptionsPanel({
           stopPolling();
           setPollingStatus("error");
           setIsGenerating(false);
-          setErrorMessage(response.error || "Failed to generate captions");
+          setErrorMessage(response.error || t("generateCaptions.failed"));
           console.error("Error generating captions:", response.error);
         }
       } catch (error) {
         stopPolling();
         setPollingStatus("error");
         setIsGenerating(false);
-        setErrorMessage(error instanceof Error ? error.message : "Failed to get caption status");
+        setErrorMessage(
+          error instanceof Error ? error.message : t("generateCaptions.failed"),
+        );
         console.error("Error polling for captions:", error);
       }
     };
@@ -122,7 +126,7 @@ export function GenerateCaptionsPanel({
       if (!reqId) {
         setPollingStatus("error");
         setIsGenerating(false);
-        setErrorMessage("Failed to start caption generation");
+        setErrorMessage(t("generateCaptions.startFailed"));
         console.error("Error generating captions: Failed to start caption generation");
         return;
       }
@@ -131,7 +135,9 @@ export function GenerateCaptionsPanel({
     } catch (error) {
       setPollingStatus("error");
       setIsGenerating(false);
-      setErrorMessage(error instanceof Error ? error.message : "Failed to start caption generation");
+      setErrorMessage(
+        error instanceof Error ? error.message : t("generateCaptions.startFailed"),
+      );
       console.error("Error generating captions:", error);
     }
   };
@@ -169,7 +175,7 @@ export function GenerateCaptionsPanel({
 
   return (
     <div className="panel-container">
-      <div className="panel-title">Generate Captions Panel</div>
+      <div className="panel-title">{t("generateCaptions.title")}</div>
       
       {/* Loading State */}
       {isLoading && (
@@ -177,7 +183,7 @@ export function GenerateCaptionsPanel({
           <div className="empty-state">
             <div className="empty-state-content">
               <Loader2 className="empty-state-icon animate-spin" />
-              <p className="empty-state-text">Checking for audio...</p>
+              <p className="empty-state-text">{t("generateCaptions.checkingAudio")}</p>
             </div>
           </div>
         </div>
@@ -189,7 +195,7 @@ export function GenerateCaptionsPanel({
           <div className="empty-state">
             <div className="empty-state-content">
               <VolumeX className="empty-state-icon" />
-              <p className="empty-state-text">No audio track found in this video</p>
+              <p className="empty-state-text">{t("generateCaptions.noAudio")}</p>
             </div>
           </div>
         </div>
@@ -201,7 +207,7 @@ export function GenerateCaptionsPanel({
           <div className="empty-state">
             <div className="empty-state-content">
               <Volume2 className="empty-state-icon" />
-              <p className="empty-state-text">Audio detected! You can now generate captions</p>
+              <p className="empty-state-text">{t("generateCaptions.audioDetected")}</p>
             </div>
           </div>
         </div>
@@ -211,7 +217,7 @@ export function GenerateCaptionsPanel({
       {!isLoading && containsAudio === true && (
         <div className="panel-section">
           <label className="label-dark" htmlFor="caption-language">
-            Audio Language
+            {t("generateCaptions.audioLanguage")}
           </label>
           <select
             id="caption-language"
@@ -219,16 +225,16 @@ export function GenerateCaptionsPanel({
             value={selectedLanguage}
             onChange={(e) => setSelectedLanguage(e.target.value)}
           >
-            <option value="auto">Auto (detect)</option>
-            <option value="english">English</option>
-            <option value="italian">Italian</option>
-            <option value="spanish">Spanish</option>
-            <option value="portuguese">Portuguese</option>
-            <option value="french">French</option>
-            <option value="german">German</option>
-            <option value="turkish">Turkish</option>
-            <option value="indonesian">Indonesian</option>
-            <option value="hindi">Hindi</option>
+            <option value="auto">{t("generateCaptions.autoDetect")}</option>
+            <option value="english">{t("generateCaptions.language.english")}</option>
+            <option value="italian">{t("generateCaptions.language.italian")}</option>
+            <option value="spanish">{t("generateCaptions.language.spanish")}</option>
+            <option value="portuguese">{t("generateCaptions.language.portuguese")}</option>
+            <option value="french">{t("generateCaptions.language.french")}</option>
+            <option value="german">{t("generateCaptions.language.german")}</option>
+            <option value="turkish">{t("generateCaptions.language.turkish")}</option>
+            <option value="indonesian">{t("generateCaptions.language.indonesian")}</option>
+            <option value="hindi">{t("generateCaptions.language.hindi")}</option>
           </select>
         </div>
       )}
@@ -236,7 +242,7 @@ export function GenerateCaptionsPanel({
       {!isLoading && containsAudio === true && (
         <div className="panel-section">
           <label className="label-dark" htmlFor="caption-phrase-length">
-            Caption length
+            {t("generateCaptions.captionLength")}
           </label>
           <select
             id="caption-phrase-length"
@@ -246,9 +252,9 @@ export function GenerateCaptionsPanel({
               setPhraseLength(e.target.value as CaptionPhraseLength)
             }
           >
-            <option value="short">Short</option>
-            <option value="medium">Medium</option>
-            <option value="long">Long</option>
+            <option value="short">{t("generateCaptions.length.short")}</option>
+            <option value="medium">{t("generateCaptions.length.medium")}</option>
+            <option value="long">{t("generateCaptions.length.long")}</option>
           </select>
         </div>
       )}
@@ -259,7 +265,7 @@ export function GenerateCaptionsPanel({
           <div className="empty-state">
             <div className="empty-state-content">
               <Loader2 className="empty-state-icon animate-spin" />
-              <p className="empty-state-text">Generating captions... Please wait</p>
+              <p className="empty-state-text">{t("generateCaptions.generating")}</p>
             </div>
           </div>
         </div>
@@ -271,7 +277,7 @@ export function GenerateCaptionsPanel({
           <div className="empty-state">
             <div className="empty-state-content">
               <CheckCircle2 className="empty-state-icon" color="var(--color-green-500)" />
-              <p className="empty-state-text">Captions generated successfully!</p>
+              <p className="empty-state-text">{t("generateCaptions.success")}</p>
             </div>
           </div>
         </div>
@@ -283,7 +289,7 @@ export function GenerateCaptionsPanel({
           <div className="empty-state">
             <div className="empty-state-content">
               <XCircle className="empty-state-icon" color="var(--color-red-500)" />
-              <p className="empty-state-text">{errorMessage || "Failed to generate captions"}</p>
+              <p className="empty-state-text">{errorMessage || t("generateCaptions.failed")}</p>
             </div>
           </div>
         </div>
@@ -297,7 +303,9 @@ export function GenerateCaptionsPanel({
             disabled={!containsAudio || isGenerating}
             className="btn-primary w-full"
           >
-            {isGenerating ? "Generating..." : "Generate Captions"}
+            {isGenerating
+              ? t("generateCaptions.generatingButton")
+              : t("generateCaptions.generate")}
           </button>
         </div>
       )}

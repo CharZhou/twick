@@ -31,6 +31,7 @@ import { TIMELINE_DROP_MEDIA_TYPE } from "@twick/video-editor";
 import type { VideoPanelProps } from "../../types/media-panel";
 import { useVideoPreview } from "../../hooks/use-video-preview";
 import UrlInput from "../shared/url-input";
+import { useTwickI18n } from "@twick/video-editor";
 
 
 export function VideoPanel({
@@ -42,10 +43,11 @@ export function VideoPanel({
   canLoadMore,
   onLoadMore,
 }: VideoPanelProps) {
+  const { t } = useTwickI18n();
   const { playingVideo, togglePlayPause } = useVideoPreview();
   return (
     <div className="panel-container">
-      <div className="panel-title">Video Library</div>
+      <div className="panel-title">{t("asset.videoLibrary")}</div>
      
      {/* Add by URL */}
       {showAddByUrl && (
@@ -127,7 +129,7 @@ export function VideoPanel({
           <div className="empty-state">
             <div className="empty-state-content">
               <Wand2 className="empty-state-icon" />
-              <p className="empty-state-text">No videos found</p>
+              <p className="empty-state-text">{t("asset.noVideosFound")}</p>
             </div>
           </div>
         )}
@@ -140,7 +142,7 @@ export function VideoPanel({
               onClick={onLoadMore}
               disabled={isLoading}
             >
-              {isLoading ? "Loading..." : "Load more"}
+              {isLoading ? t("common.loading") : t("common.loadMore")}
             </button>
           </div>
         )}

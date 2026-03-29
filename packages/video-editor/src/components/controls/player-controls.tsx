@@ -20,6 +20,7 @@ import {
   DEFAULT_TIMELINE_ZOOM_CONFIG,
   DEFAULT_FPS,
 } from "../../helpers/constants";
+import { useTwickI18n } from "../../i18n/i18n-context";
 
 /**
  * Props for the PlayerControls component.
@@ -109,6 +110,7 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
   followPlayheadEnabled = true,
   onFollowPlayheadToggle,
 }) => {
+  const { t } = useTwickI18n();
 
   const MAX_ZOOM = zoomConfig.max;
   const MIN_ZOOM = zoomConfig.min;
@@ -160,7 +162,7 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
         <button
           onClick={handleDelete}
           disabled={!hasSelection}
-          title="Delete"
+          title={t("player.delete")}
           className={`control-btn delete-btn ${
             !hasSelection ? "btn-disabled" : ""
           }`}
@@ -171,7 +173,7 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
         <button
           onClick={handleSplit}
           disabled={!(selectedItem instanceof TrackElement)}
-          title="Split"
+          title={t("player.split")}
           className={`control-btn split-btn ${
             !(selectedItem instanceof TrackElement) ? "btn-disabled" : ""
           }`}
@@ -192,7 +194,11 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
         {onFollowPlayheadToggle && (
           <button
             onClick={onFollowPlayheadToggle}
-            title={followPlayheadEnabled ? "Follow playhead on (click to disable)" : "Follow playhead off (click to enable)"}
+            title={
+              followPlayheadEnabled
+                ? t("player.followOn")
+                : t("player.followOff")
+            }
             className={`control-btn ${followPlayheadEnabled ? "follow-btn-active" : ""}`}
           >
             <Crosshair className="icon-md" />
@@ -202,7 +208,7 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
         <button
           onClick={handleSeekToStart}
           disabled={playerState === PLAYER_STATE.REFRESH}
-          title="Jump to start"
+          title={t("player.jumpToStart")}
           className="control-btn"
         >
           <SkipBack className="icon-md" />
@@ -214,10 +220,10 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
           disabled={playerState === PLAYER_STATE.REFRESH}
           title={
             playerState === PLAYER_STATE.PLAYING
-              ? "Pause"
+              ? t("player.pause")
               : playerState === PLAYER_STATE.REFRESH
-              ? "Refreshing"
-              : "Play"
+              ? t("player.refreshing")
+              : t("player.play")
           }
           className="control-btn play-pause-btn"
         >
@@ -234,7 +240,7 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
         <button
           onClick={handleSeekToEnd}
           disabled={playerState === PLAYER_STATE.REFRESH}
-          title="Jump to end"
+          title={t("player.jumpToEnd")}
           className="control-btn"
         >
           <SkipForward className="icon-md" />
@@ -254,7 +260,7 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
           <button
             onClick={handleZoomOut}
             disabled={zoomLevel <= MIN_ZOOM}
-            title="Zoom Out"
+            title={t("player.zoomOut")}
             className={`control-btn ${
               zoomLevel <= MIN_ZOOM ? "btn-disabled" : ""
             }`}
@@ -268,7 +274,7 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
           <button
             onClick={handleZoomIn}
             disabled={zoomLevel >= MAX_ZOOM}
-            title="Zoom In"
+            title={t("player.zoomIn")}
             className={`control-btn ${
               zoomLevel >= MAX_ZOOM ? "btn-disabled" : ""
             }`}

@@ -6,6 +6,7 @@ import {
   LineElement,
 } from "@twick/timeline";
 import type { PanelProps } from "../../types";
+import { useTwickI18n } from "@twick/video-editor";
 
 const SHAPE_COLORS = {
   line: "#f97316",
@@ -18,6 +19,7 @@ export const AnnotationsPanel = ({
   addElement,
   videoResolution,
 }: PanelProps): React.ReactElement => {
+  const { t } = useTwickI18n();
   const addLine = async () => {
     if (!addElement) return;
     const element = new LineElement(SHAPE_COLORS.line, {
@@ -60,7 +62,7 @@ export const AnnotationsPanel = ({
   return (
     <div className="panel-container">
       <div className="panel-header">
-        <h3>Shapes</h3>
+        <h3>{t("annotations.title")}</h3>
       </div>
       <div
         className="panel-content"
@@ -92,9 +94,9 @@ export const AnnotationsPanel = ({
               marginBottom: 8,
             }}
           />
-          <div style={{ fontWeight: 600, marginBottom: 2 }}>Line</div>
+          <div style={{ fontWeight: 600, marginBottom: 2 }}>{t("annotations.line")}</div>
           <div style={{ fontSize: 12, opacity: 0.8 }}>
-            Draw a straight segment to connect or underline.
+            {t("annotations.lineDescription")}
           </div>
         </button>
 
@@ -135,9 +137,9 @@ export const AnnotationsPanel = ({
               }}
             />
           </div>
-          <div style={{ fontWeight: 600, marginBottom: 2 }}>Arrow callout</div>
+          <div style={{ fontWeight: 600, marginBottom: 2 }}>{t("annotations.arrow")}</div>
           <div style={{ fontSize: 12, opacity: 0.8 }}>
-            Emphasize a button or region with a directional arrow.
+            {t("annotations.arrowDescription")}
           </div>
         </button>
 
@@ -164,9 +166,9 @@ export const AnnotationsPanel = ({
               marginBottom: 8,
             }}
           />
-          <div style={{ fontWeight: 600, marginBottom: 2 }}>Box</div>
+          <div style={{ fontWeight: 600, marginBottom: 2 }}>{t("annotations.box")}</div>
           <div style={{ fontSize: 12, opacity: 0.8 }}>
-            Draw attention to important text or UI with a soft highlight.
+            {t("annotations.boxDescription")}
           </div>
         </button>
 
@@ -195,9 +197,9 @@ export const AnnotationsPanel = ({
               alignSelf: "flex-start",
             }}
           />
-          <div style={{ fontWeight: 600, marginBottom: 2 }}>Circle</div>
+          <div style={{ fontWeight: 600, marginBottom: 2 }}>{t("annotations.circle")}</div>
           <div style={{ fontSize: 12, opacity: 0.8 }}>
-            Add a circular callout or highlight area.
+            {t("annotations.circleDescription")}
           </div>
         </button>
       </div>

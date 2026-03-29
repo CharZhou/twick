@@ -1,5 +1,5 @@
 import { TextElement } from "@twick/timeline";
-import { AVAILABLE_TEXT_FONTS } from "@twick/video-editor";
+import { AVAILABLE_TEXT_FONTS, useTwickI18n } from "@twick/video-editor";
 
 interface TextStylePanelProps {
   addElement: (element: TextElement) => void;
@@ -168,6 +168,7 @@ const TEXT_STYLE_PRESETS: TextStylePreset[] = [
 ];
 
 export function TextStylePanel({ addElement }: TextStylePanelProps) {
+  const { t } = useTwickI18n();
   const createTextFromPreset = async (preset: TextStylePreset) => {
     const textElement = new TextElement("Sample")
       .setFontSize(preset.fontSize)
@@ -204,7 +205,7 @@ export function TextStylePanel({ addElement }: TextStylePanelProps) {
 
   return (
     <div className="panel-container">
-      <div className="panel-title">Text Style</div>
+      <div className="panel-title">{t("textStyle.title")}</div>
       <div className="panel-section">
         <div className="text-style-grid">
           {TEXT_STYLE_PRESETS.map((preset) => (
@@ -256,4 +257,3 @@ export function TextStylePanel({ addElement }: TextStylePanelProps) {
     </div>
   );
 }
-

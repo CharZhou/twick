@@ -4,6 +4,7 @@ import type { EffectKey } from "@twick/effects";
 import { useEffect, useState } from "react";
 import { useEffectPanel } from "../../hooks/use-effect-panel";
 import { getEffectPreviewForEffect } from "../../helpers/effect-preview-manager";
+import { useTwickI18n } from "@twick/video-editor";
 
 interface EffectStylePanelProps {
   selectedElement: TrackElement | null;
@@ -60,6 +61,7 @@ export function EffectStylePanel({
   addElement,
   updateElement,
 }: EffectStylePanelProps) {
+  const { t } = useTwickI18n();
   const { selectedEffectKey, handleAddEffect, handleUpdateEffect } =
     useEffectPanel({
       selectedElement,
@@ -77,7 +79,7 @@ export function EffectStylePanel({
 
   return (
     <div className="panel-container">
-      <div className="panel-title">Effect Style</div>
+      <div className="panel-title">{t("effectStyle.title")}</div>
       <div className="panel-section">
         <div className="effect-grid">
           {EFFECT_OPTIONS.map((effect) => {
@@ -101,4 +103,3 @@ export function EffectStylePanel({
     </div>
   );
 }
-

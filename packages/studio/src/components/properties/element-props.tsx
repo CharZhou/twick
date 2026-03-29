@@ -5,8 +5,10 @@ import { PropertyRow } from "./property-row";
 import { Ruler } from "lucide-react";
 import { AccordionItem } from "../shared/accordion-item";
 import { useState } from "react";
+import { useTwickI18n } from "@twick/video-editor";
 
 export function ElementProps({ selectedElement, updateElement }: PropertiesPanelProps) {
+  const { t } = useTwickI18n();
   const opacity = selectedElement?.getOpacity() || 1;
   const rotation = selectedElement?.getRotation() || 0;
   const position = selectedElement?.getPosition() || { x: 0, y: 0 };
@@ -64,17 +66,17 @@ export function ElementProps({ selectedElement, updateElement }: PropertiesPanel
 
   return (
     <div className="panel-container">
-      <div className="panel-title">Properties</div>
+      <div className="panel-title">{t("elementProps.title")}</div>
 
       <AccordionItem
-        title="Transform"
+        title={t("elementProps.transform")}
         icon={<Ruler className="icon-sm" />}
         isOpen={isTransformOpen}
         onToggle={() => setIsTransformOpen((open) => !open)}
       >
         <div className="properties-group">
           <div className="property-section">
-            <PropertyRow label="Position X">
+            <PropertyRow label={t("elementProps.positionX")}>
               <input
                 type="number"
                 value={position.x ?? 0}
@@ -84,7 +86,7 @@ export function ElementProps({ selectedElement, updateElement }: PropertiesPanel
                 className="input-dark"
               />
             </PropertyRow>
-            <PropertyRow label="Position Y">
+            <PropertyRow label={t("elementProps.positionY")}>
               <input
                 type="number"
                 value={position.y ?? 0}
@@ -99,7 +101,7 @@ export function ElementProps({ selectedElement, updateElement }: PropertiesPanel
           {/* Dimensions - for rect, circle only; image/video resize via canvas */}
           {hasShapeDimensions && dimensions && (
             <div className="property-section">
-              <PropertyRow label="Width">
+              <PropertyRow label={t("elementProps.width")}>
                 <input
                   type="number"
                   min={1}
@@ -113,7 +115,7 @@ export function ElementProps({ selectedElement, updateElement }: PropertiesPanel
                   className="input-dark"
                 />
               </PropertyRow>
-              <PropertyRow label="Height">
+              <PropertyRow label={t("elementProps.height")}>
                 <input
                   type="number"
                   min={1}
@@ -133,7 +135,7 @@ export function ElementProps({ selectedElement, updateElement }: PropertiesPanel
           {/* Opacity */}
           <div className="property-section">
             <PropertyRow
-              label="Opacity"
+              label={t("elementProps.opacity")}
               secondary={
                 <span>
                   {Math.round((opacity ?? 1) * 100)}
@@ -157,7 +159,7 @@ export function ElementProps({ selectedElement, updateElement }: PropertiesPanel
           {/* Rotation */}
           <div className="property-section">
             <PropertyRow
-              label="Rotation"
+              label={t("elementProps.rotation")}
               secondary={
                 <span>
                   {Math.round(rotation ?? 0)}

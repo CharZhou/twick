@@ -12,8 +12,10 @@ import { ICaptionGenerationPollingResponse, StudioConfig, CaptionEntry } from ".
 import { loadFile, saveAsFile } from "@twick/media-utils";
 import { useState } from "react";
 import { useLivePlayerContext } from "@twick/live-player";
+import { useTwickI18n } from "@twick/video-editor";
 
 const useStudioOperation = (studioConfig?: StudioConfig) => {
+  const { t } = useTwickI18n();
   const { editor, present, videoResolution } = useTimelineContext();
   const { setSeekTime, setPlayerState } = useLivePlayerContext();
   const [projectName, setProjectName] = useState("");
@@ -47,7 +49,7 @@ const useStudioOperation = (studioConfig?: StudioConfig) => {
     if (projectName) {
       fileName = projectName;
     } else {
-      fileName = prompt("Enter the name of the project") || "untitled-project";
+      fileName = prompt(t("studio.prompt.projectName")) || "untitled-project";
       fileName = fileName + ".json";
       setProjectName(fileName);
     }
@@ -76,7 +78,7 @@ const useStudioOperation = (studioConfig?: StudioConfig) => {
         },
       });
     } else {
-        alert("Export video not supported in demo mode");
+        alert(t("studio.demo.exportVideoUnsupported"));
     }
   };
 
@@ -129,7 +131,7 @@ const useStudioOperation = (studioConfig?: StudioConfig) => {
     }
     return {
       status: "failed",
-      error: "Caption generation service not found",
+      error: t("generateCaptions.failed"),
     } as ICaptionGenerationPollingResponse;
   }
 

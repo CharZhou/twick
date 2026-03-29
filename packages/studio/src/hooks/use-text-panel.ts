@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { TextElement, TrackElement, type TextAlign } from "@twick/timeline";
-import { AVAILABLE_TEXT_FONTS } from "@twick/video-editor";
+import { AVAILABLE_TEXT_FONTS, useTwickI18n } from "@twick/video-editor";
 
 export const DEFAULT_TEXT_PROPS = {
   text: "Sample",
@@ -63,7 +63,9 @@ export const useTextPanel = ({
   addElement: (element: TrackElement) => void;
   updateElement: (element: TrackElement) => void;
 }): TextPanelState & TextPanelActions => {
-  const [textContent, setTextContent] = useState(DEFAULT_TEXT_PROPS.text);
+  const { t } = useTwickI18n();
+  const defaultText = t("textPanel.placeholder");
+  const [textContent, setTextContent] = useState(defaultText);
   const [fontSize, setFontSize] = useState(DEFAULT_TEXT_PROPS.fontSize);
   const [selectedFont, setSelectedFont] = useState(DEFAULT_TEXT_PROPS.fontFamily);
   const [isBold, setIsBold] = useState(DEFAULT_TEXT_PROPS.fontWeight === 700);
@@ -274,7 +276,7 @@ export const useTextPanel = ({
         setBackgroundOpacity(textProps.backgroundOpacity ?? 1);
       }
     } else {
-      setTextContent(DEFAULT_TEXT_PROPS.text);
+      setTextContent(defaultText);
       setFontSize(DEFAULT_TEXT_PROPS.fontSize);
       setSelectedFont(DEFAULT_TEXT_PROPS.fontFamily);
       setIsBold(DEFAULT_TEXT_PROPS.fontWeight === 700);
@@ -288,7 +290,7 @@ export const useTextPanel = ({
       setBackgroundColor("#FACC15");
       setBackgroundOpacity(1);
     }
-  }, [selectedElement]);
+  }, [defaultText, selectedElement]);
 
   return {
     textContent,

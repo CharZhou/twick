@@ -26,8 +26,11 @@
  */
 
 import { Wand2, Plus } from "lucide-react";
-import type { MediaItem } from "@twick/video-editor";
-import { TIMELINE_DROP_MEDIA_TYPE } from "@twick/video-editor";
+import {
+  TIMELINE_DROP_MEDIA_TYPE,
+  type MediaItem,
+  useTwickI18n,
+} from "@twick/video-editor";
 import type { ImagePanelProps } from "../../types/media-panel";
 import UrlInput from "../shared/url-input";
 
@@ -40,9 +43,10 @@ export function ImagePanel({
   onLoadMore,
   showAddByUrl = true,
 }: ImagePanelProps) {
+  const { t } = useTwickI18n();
   return (
     <div className="panel-container">
-      <div className="panel-title">Image Library</div>
+      <div className="panel-title">{t("asset.imageLibrary")}</div>
 
       {/* Add by URL */}
       {showAddByUrl && (
@@ -89,7 +93,7 @@ export function ImagePanel({
           <div className="empty-state">
             <div className="empty-state-content">
               <Wand2 className="empty-state-icon" />
-              <p className="empty-state-text">No images found</p>
+              <p className="empty-state-text">{t("asset.noImagesFound")}</p>
             </div>
           </div>
         )}
@@ -102,7 +106,7 @@ export function ImagePanel({
               onClick={onLoadMore}
               disabled={isLoading}
             >
-              {isLoading ? "Loading..." : "Load more"}
+              {isLoading ? t("common.loading") : t("common.loadMore")}
             </button>
           </div>
         )}

@@ -5,8 +5,10 @@ import {
   CaptionEntry,
   CaptionPhraseLength,
 } from "../types";
+import { useTwickI18n } from "@twick/video-editor";
 
 const useGenerateCaptions = (studioConfig?: StudioConfig) => {
+  const { t } = useTwickI18n();
   const { editor, present } = useTimelineContext();
   /**
    * Generates captions using the new polling-based service
@@ -28,7 +30,7 @@ const useGenerateCaptions = (studioConfig?: StudioConfig) => {
       );
       return reqId;
     }
-    alert("Generate captions not supported in demo mode");
+    alert(t("studio.demo.generateCaptionsUnsupported"));
     return null;
   };
 
@@ -49,7 +51,7 @@ const useGenerateCaptions = (studioConfig?: StudioConfig) => {
     }
     return {
       status: "failed",
-      error: "Caption generation service not found",
+      error: t("generateCaptions.failed"),
     } as ICaptionGenerationPollingResponse;
   };
 

@@ -57,6 +57,7 @@
  */
 
 import type { TextPanelState, TextPanelActions } from "../../hooks/use-text-panel";
+import { useTwickI18n } from "@twick/video-editor";
 
 export type TextPanelProps = TextPanelState & TextPanelActions;
 
@@ -91,15 +92,16 @@ export function TextPanel({
   setBackgroundOpacity,
   handleApplyChanges,
 }: TextPanelProps) {
+  const { t } = useTwickI18n();
   return (
     <div className="panel-container">
-      <div className="panel-title">Text</div>
+      <div className="panel-title">{t("textPanel.title")}</div>
       {/* Text Content */}
       <div className="flex panel-section">
         <input
           type="text"
           value={textContent}
-          placeholder="Sample"
+          placeholder={t("textPanel.placeholder")}
           onChange={(e) => setTextContent(e.target.value)}
           className="input-dark"
         />
@@ -107,7 +109,7 @@ export function TextPanel({
 
       {/* Font Size */}
       <div className="panel-section">
-        <label className="label-dark">Font Size</label>
+        <label className="label-dark">{t("textPanel.fontSize")}</label>
         <div className="slider-container">
           <input
             type="range"
@@ -123,7 +125,7 @@ export function TextPanel({
 
       {/* Font */}
       <div className="panel-section">
-        <label className="label-dark">Font</label>
+        <label className="label-dark">{t("textPanel.font")}</label>
         <div className="font-controls">
           <select
             value={selectedFont}
@@ -153,11 +155,11 @@ export function TextPanel({
 
       {/* Colors */}
       <div className="panel-section">
-        <label className="label-dark">Colors</label>
+        <label className="label-dark">{t("textPanel.colors")}</label>
         <div className="color-section">
           {/* Text Color */}
           <div className="color-control">
-            <label className="label-small">Text Color</label>
+            <label className="label-small">{t("textPanel.textColor")}</label>
             <div className="color-inputs">
               <input
                 type="color"
@@ -176,7 +178,7 @@ export function TextPanel({
 
           {/* Stroke Color */}
           <div className="color-control">
-            <label className="label-small">Stroke Color</label>
+            <label className="label-small">{t("textPanel.strokeColor")}</label>
             <div className="color-inputs">
               <input
                 type="color"
@@ -202,14 +204,14 @@ export function TextPanel({
                 onChange={(e) => setApplyShadow(e.target.checked)}
                 className="checkbox-purple"
               />
-              Apply Shadow
+              {t("textPanel.applyShadow")}
             </label>
           </div>
 
           {/* Shadow Color - Only shown when shadow is enabled */}
           {applyShadow && (
             <div className="color-control">
-              <label className="label-small">Shadow Color</label>
+              <label className="label-small">{t("textPanel.shadowColor")}</label>
               <div className="color-inputs">
                 <input
                   type="color"
@@ -231,7 +233,7 @@ export function TextPanel({
 
       {/* Stroke Width */}
       <div className="panel-section">
-        <label className="label-dark">Stroke Width</label>
+        <label className="label-dark">{t("textPanel.strokeWidth")}</label>
         <div className="slider-container">
           <input
             type="range"
@@ -248,7 +250,7 @@ export function TextPanel({
 
       {/* Background (optional) */}
       <div className="panel-section">
-        <label className="label-dark">Background</label>
+        <label className="label-dark">{t("textPanel.background")}</label>
         <div className="color-section">
           <div className="checkbox-control">
             <label className="checkbox-label">
@@ -258,13 +260,13 @@ export function TextPanel({
                 onChange={(e) => setApplyBackground(e.target.checked)}
                 className="checkbox-purple"
               />
-              Apply Background
+              {t("textPanel.applyBackground")}
             </label>
           </div>
           {applyBackground && (
             <>
               <div className="color-control">
-                <label className="label-small">Background Color</label>
+                <label className="label-small">{t("textPanel.backgroundColor")}</label>
                 <div className="color-inputs">
                   <input
                     type="color"
@@ -281,7 +283,7 @@ export function TextPanel({
                 </div>
               </div>
               <div className="panel-section">
-                <label className="label-small">Background Opacity</label>
+                <label className="label-small">{t("textPanel.backgroundOpacity")}</label>
                 <div className="slider-container">
                   <input
                     type="range"
@@ -304,7 +306,7 @@ export function TextPanel({
       {operation !== "Apply Changes" && (
         <div className="flex panel-section">
           <button onClick={handleApplyChanges} className="btn-primary w-full">
-            {operation}
+            {operation === "Add Text" ? t("textPanel.addText") : operation}
           </button>
         </div>
       )}

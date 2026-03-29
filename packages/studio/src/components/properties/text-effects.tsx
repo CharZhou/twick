@@ -5,11 +5,13 @@ import { AccordionItem } from "../shared/accordion-item";
 import { PropertyRow } from "./property-row";
 import { SparklesIcon } from "lucide-react";
 import { useState } from "react";
+import { useTwickI18n } from "@twick/video-editor";
 
 export function TextEffects({
   selectedElement,
   updateElement,
 }: PropertiesPanelProps) {
+  const { t } = useTwickI18n();
   if (!(selectedElement instanceof TextElement)) return null;
 
   const currentEffect = selectedElement.getTextEffect();
@@ -56,9 +58,9 @@ export function TextEffects({
 
   return (
     <div className="panel-container">
-      <div className="panel-title">Text Effects</div>
+      <div className="panel-title">{t("textEffects.title")}</div>
       <AccordionItem
-        title="Effects"
+        title={t("textEffects.section")}
         icon={<SparklesIcon className="icon-sm" />}
         isOpen={isEffectsOpen}
         onToggle={() => setIsEffectsOpen((open) => !open)}
@@ -66,13 +68,13 @@ export function TextEffects({
         <div className="properties-group">
           {/* Text Effect Selection */}
           <div className="property-section">
-            <PropertyRow label="Preset">
+            <PropertyRow label={t("textEffects.preset")}>
               <select
                 value={currentEffect?.getName() || ""}
                 onChange={(e) => handleUpdateEffect({ name: e.target.value })}
                 className="select-dark w-full"
               >
-                <option value="">No Effect</option>
+                <option value="">{t("textEffects.noEffect")}</option>
                 {TEXT_EFFECTS.map((effect) => (
                   <option key={effect.name} value={effect.name}>
                     {effect.name.charAt(0).toUpperCase() + effect.name.slice(1)}
@@ -87,7 +89,7 @@ export function TextEffects({
             <>
               {/* Delay */}
               <div className="property-section">
-                <PropertyRow label="Delay (s)">
+                <PropertyRow label={t("textEffects.delay")}>
                   <input
                     type="number"
                     min="0"
@@ -104,7 +106,7 @@ export function TextEffects({
 
               {/* Duration */}
               <div className="property-section">
-                <PropertyRow label="Duration (s)">
+                <PropertyRow label={t("textEffects.duration")}>
                   <input
                     type="number"
                     min="0.1"
@@ -121,7 +123,7 @@ export function TextEffects({
 
               {/* Buffer Time */}
               <div className="property-section">
-                <PropertyRow label="Buffer (s)">
+                <PropertyRow label={t("textEffects.buffer")}>
                   <input
                     type="number"
                     min="0.05"

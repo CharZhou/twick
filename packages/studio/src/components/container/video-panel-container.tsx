@@ -3,13 +3,15 @@ import type { PanelProps } from "../../types";
 import { VideoPanel } from "../panel/video-panel";
 import { useMediaPanel } from "../../hooks/use-media-panel";
 import { useMedia } from "../../context/media-context";
-import { getMediaManager, CloudMediaUpload } from "../shared";
+import { getMediaManager, CloudMediaUpload, FileInput } from "../shared";
 import SearchInput from "../shared/search-input";
 import type { AssetProviderConfig, MediaItem } from "@twick/video-editor";
-import { throttle } from "@twick/video-editor";
+import { throttle, useTwickI18n } from "@twick/video-editor";
 import { getAssetLibrary } from "../../helpers/asset-library";
+import { importFileFromUrl } from "../../hooks/use-cloud-media-upload";
 
 export function VideoPanelContainer(props: PanelProps) {
+  const { t } = useTwickI18n();
   const [activeSource, setActiveSource] = useState<"user" | "public">("user");
   return (
     <>
@@ -21,7 +23,7 @@ export function VideoPanelContainer(props: PanelProps) {
               }`}
             onClick={() => setActiveSource("user")}
           >
-            My assets
+            {t("common.myAssets")}
           </button>
           <button
             type="button"
@@ -29,7 +31,7 @@ export function VideoPanelContainer(props: PanelProps) {
               }`}
             onClick={() => setActiveSource("public")}
           >
-            Public
+            {t("common.public")}
           </button>
         </div>
       </div>
@@ -44,6 +46,7 @@ export function VideoPanelContainer(props: PanelProps) {
 }
 
 function VideoUserAssetsSection(props: PanelProps) {
+  const { t } = useTwickI18n();
   const { addItem } = useMedia("video");
   const mediaManager = getMediaManager();
   const [page, setPage] = useState(1);
@@ -75,11 +78,33 @@ function VideoUserAssetsSection(props: PanelProps) {
       }
     })();
 
+    const finalUrl =
+      props.uploadConfig?.provider === "aether"
+        ? (
+            await importFileFromUrl(
+              {
+                uploadApiUrl: props.uploadConfig.uploadApiUrl,
+                importApiUrl: props.uploadConfig.importApiUrl,
+                provider: props.uploadConfig.provider,
+                directory: props.uploadConfig.directory,
+                apiKey: props.uploadConfig.apiKey,
+                userToken: props.uploadConfig.userToken,
+              },
+              {
+                sourceUrl: url,
+                fileName: nameFromUrl,
+              },
+            )
+          ).url
+        : url;
+
     const newItem = await mediaManager.addItem({
       name: nameFromUrl,
-      url,
+      url: finalUrl,
       type: "video",
-      metadata: { source: "url" },
+      metadata: {
+        source: props.uploadConfig?.provider === "aether" ? "aether" : "url",
+      },
     });
     addItem(newItem);
   };
@@ -99,14 +124,29 @@ function VideoUserAssetsSection(props: PanelProps) {
 
   return (
     <>
+      {!props.uploadConfig && (
+        <div className="flex gap-2 panel-section">
+          <FileInput
+            acceptFileTypes={acceptFileTypes}
+            onFileLoad={handleFileUpload}
+            buttonText={t("common.importVideo")}
+            id="studio-video-file-input"
+            className="btn-ghost w-full file-input-label"
+          />
+        </div>
+      )}
       {props.uploadConfig && (
         <div className="flex panel-section">
           <CloudMediaUpload
             uploadApiUrl={props.uploadConfig.uploadApiUrl}
+            importApiUrl={props.uploadConfig.importApiUrl}
             provider={props.uploadConfig.provider}
+            directory={props.uploadConfig.directory}
+            apiKey={props.uploadConfig.apiKey}
+            userToken={props.uploadConfig.userToken}
             accept="video/*"
             onSuccess={onCloudUploadSuccess}
-            buttonText="Upload video"
+            buttonText={t("common.uploadVideo")}
             className="btn-ghost w-full"
           />
         </div>
@@ -126,6 +166,7 @@ function VideoUserAssetsSection(props: PanelProps) {
 }
 
 function VideoPublicAssetsSection() {
+  const { t } = useTwickI18n();
   const assetLibrary = getAssetLibrary();
   const [providerConfigs, setProviderConfigs] = useState<AssetProviderConfig[]>(
     [],
@@ -223,7 +264,7 @@ function VideoPublicAssetsSection() {
       <div className="panel-section">
         <div className="property-row">
           <div className="property-row-label">
-            <span className="property-label">Provider</span>
+            <span className="property-label">{t("common.provider")}</span>
           </div>
           <div className="property-row-control">
             <select
@@ -233,7 +274,7 @@ function VideoPublicAssetsSection() {
                 setActiveProviderId(e.target.value as string | "all")
               }
             >
-              <option value="all">All providers</option>
+              <option value="all">{t("common.allProviders")}</option>
               {providerConfigs
                 .filter((p) => p.enabled)
                 .map((p) => (

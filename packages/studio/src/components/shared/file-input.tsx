@@ -1,15 +1,11 @@
-import { Upload } from "lucide-react";
-
 const FileInput = ({
   acceptFileTypes,
   onFileLoad,
   buttonText,
   id,
-  className,
-  icon,
 }: {
   acceptFileTypes: string[];
-  onFileLoad: (content: any) => void;
+  onFileLoad: (content: any) => void | Promise<void>;
   buttonText: string;
   id: string;
   className?: string;
@@ -18,50 +14,41 @@ const FileInput = ({
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          onFileLoad({
-            content:
-              file.type === "application/json"
-                ? event.target?.result
-                : undefined,
-            type: file.type,
-            name: file.name,
-            file: file,
-            blobUrl: URL.createObjectURL(file),
-          });
-        } catch (error) {
+      Promise.resolve(
+        onFileLoad({
+          content: undefined,
+          type: file.type,
+          name: file.name,
+          file,
+          blobUrl: URL.createObjectURL(file),
+        }),
+      )
+        .catch((error) => {
           console.error("Error parsing file:", error);
-        }
-      };
-      console.log("file", file);
-
-      if (file.type === "application/json") {
-        reader.readAsText(file);
-      } else {
-        reader.readAsDataURL(file);
-      }
+        })
+        .finally(() => {
+          e.target.value = "";
+        });
     }
   };
 
   return (
-    <div className="file-input-container">
+    <label
+      htmlFor={id}
+      className="file-input-container"
+      style={{ alignItems: "center", cursor: "pointer" }}
+    >
       <input
         type="file"
         accept={acceptFileTypes.join(",")}
-        className="file-input-hidden"
+        className="input w-full"
         id={id}
         onChange={onFileChange}
       />
-      <label
-        htmlFor={id}
-        className={className || "btn-primary file-input-label"}
-      >
-        {icon || <Upload className="icon-sm" />}
+      <span className="text-sm opacity-80" style={{ marginLeft: "0.5rem" }}>
         {buttonText ?? "Upload"}
-      </label>
-    </div>
+      </span>
+    </label>
   );
 };
 

@@ -29,7 +29,7 @@
  */
 
 import { Wand2, Plus, Volume2, Play, Pause } from "lucide-react";
-import { TIMELINE_DROP_MEDIA_TYPE } from "@twick/video-editor";
+import { TIMELINE_DROP_MEDIA_TYPE, useTwickI18n } from "@twick/video-editor";
 import UrlInput from "../shared/url-input";
 import type { AudioPanelProps } from "../../types/media-panel";
 import { useAudioPreview } from "../../hooks/use-audio-preview";
@@ -43,10 +43,11 @@ export const AudioPanel = ({
   canLoadMore,
   onLoadMore,
 }: AudioPanelProps) => {
+  const { t } = useTwickI18n();
   const { playingAudio, togglePlayPause } = useAudioPreview();
   return (
     <div className="panel-container">
-      <div className="panel-title">Audio Library</div>
+      <div className="panel-title">{t("asset.audioLibrary")}</div>
 
       {/* Add by URL */}
       <div className="panel-section">
@@ -117,7 +118,7 @@ export const AudioPanel = ({
           <div className="empty-state">
             <div className="empty-state-content">
               <Wand2 className="empty-state-icon" />
-              <p className="empty-state-text">No audio files found</p>
+              <p className="empty-state-text">{t("asset.noAudioFound")}</p>
             </div>
           </div>
         )}
@@ -130,7 +131,7 @@ export const AudioPanel = ({
               onClick={onLoadMore}
               disabled={isLoading}
             >
-              {isLoading ? "Loading..." : "Load more"}
+              {isLoading ? t("common.loading") : t("common.loadMore")}
             </button>
           </div>
         )}

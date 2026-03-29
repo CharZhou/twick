@@ -30,8 +30,10 @@ import {
   Square,
   Wand2,
   File,
+  UserRound,
 } from 'lucide-react'
 import type { ToolCategory } from '../types'
+import { useTwickI18n } from "@twick/video-editor";
 
 const defaultToolCategories: ToolCategory[] = [
   // { id: 'templates', name: 'Templates', icon: 'Plus', description: 'Start from a project template' },
@@ -47,7 +49,21 @@ const defaultToolCategories: ToolCategory[] = [
   // { id: 'script', name: 'Script', icon: 'Type', description: 'Build timeline from a script outline' },
   { id: 'caption', name: 'Caption', icon: 'MessageSquare', description: 'Manage captions'},
   { id: 'generate-media', name: 'Generate', icon: 'Wand2', description: 'Generate image or video with AI'},
+  { id: 'digital-human', name: 'Avatar', icon: 'UserRound', description: 'Create avatar videos' },
 ]
+
+const toolLabelKeyById = {
+  video: "toolbar.video",
+  image: "toolbar.image",
+  audio: "toolbar.audio",
+  text: "toolbar.text",
+  "text-style": "toolbar.textStyle",
+  effect: "toolbar.effect",
+  shape: "toolbar.shape",
+  caption: "toolbar.caption",
+  "generate-media": "toolbar.generate",
+  "digital-human": "toolbar.digitalHuman",
+} as const;
 
 const getIcon = (iconName: string) => {
   switch (iconName) {
@@ -63,6 +79,7 @@ const getIcon = (iconName: string) => {
     case 'MessageSquare': return MessageSquare
     case 'Wand2': return Wand2
     case 'File': return File
+    case 'UserRound': return UserRound
     default: return Plus
   }
 }
@@ -78,6 +95,7 @@ export function Toolbar({
   customTools?: ToolCategory[];
   hiddenTools?: string[];
 }) {
+  const { t } = useTwickI18n();
 
   const mergedTools = [...defaultToolCategories, ...customTools].filter(
     (tool) => !hiddenTools.includes(tool.id)
@@ -92,8 +110,11 @@ export function Toolbar({
       {mergedTools.map((tool) => {
         const Icon = getIcon(tool.icon)
         const isSelected = selectedTool === tool.id
-        
-        const tooltipText = `${tool.name}${tool.shortcut ? ` (${tool.shortcut})` : ''}`;
+        const localizedName =
+          tool.id in toolLabelKeyById
+            ? t(toolLabelKeyById[tool.id as keyof typeof toolLabelKeyById])
+            : tool.name;
+        const tooltipText = `${localizedName}${tool.shortcut ? ` (${tool.shortcut})` : ''}`;
         return (
           <div
             key={tool.id}
@@ -104,7 +125,7 @@ export function Toolbar({
           >
             <Icon className="icon-sm" />
             <span className="toolbar-label">
-              {tool.name}
+              {localizedName}
             </span>
           </div>
         )

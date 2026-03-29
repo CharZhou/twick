@@ -36,6 +36,7 @@
  */
 
 import type { RectPanelState, RectPanelActions } from "../../hooks/use-rect-panel";
+import { useTwickI18n } from "@twick/video-editor";
 
 export type RectPanelProps = RectPanelState & RectPanelActions;
 
@@ -51,12 +52,13 @@ export function RectPanel({
   setLineWidth,
   handleApplyChanges,
 }: RectPanelProps) {
+  const { t } = useTwickI18n();
   return (
     <div className="panel-container">
-      <div className="panel-title">Rectangle</div>
+      <div className="panel-title">{t("rectPanel.title")}</div>
       {/* Corner Radius */}
       <div className="panel-section">
-        <label className="label-dark">Corner Radius</label>
+        <label className="label-dark">{t("rectPanel.cornerRadius")}</label>
         <div className="slider-container">
           <input
             type="range"
@@ -72,7 +74,7 @@ export function RectPanel({
 
       {/* Fill Color */}
       <div className="panel-section">
-        <label className="label-dark">Fill Color</label>
+        <label className="label-dark">{t("rectPanel.fillColor")}</label>
         <div className="color-inputs">
           <input
             type="color"
@@ -91,7 +93,7 @@ export function RectPanel({
 
       {/* Stroke Color */}
       <div className="panel-section">
-        <label className="label-dark">Stroke Color</label>
+        <label className="label-dark">{t("rectPanel.strokeColor")}</label>
         <div className="color-inputs">
           <input
             type="color"
@@ -110,7 +112,7 @@ export function RectPanel({
 
       {/* Line Width */}
       <div className="panel-section">
-        <label className="label-dark">Line Width</label>
+        <label className="label-dark">{t("rectPanel.lineWidth")}</label>
         <div className="slider-container">
           <input
             type="range"
@@ -131,7 +133,7 @@ export function RectPanel({
             onClick={handleApplyChanges}
             className="btn-primary w-full"
           >
-            {operation}
+            {operation === "Add Rectangle" ? t("rectPanel.addRectangle") : operation}
           </button>
         </div>
       )}

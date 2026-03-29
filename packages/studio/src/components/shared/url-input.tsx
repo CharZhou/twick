@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { useTwickI18n } from "@twick/video-editor";
 
 type MediaType = "video" | "audio" | "image";
+
+const mediaTypeLabelKey = {
+  video: "mediaType.video",
+  image: "mediaType.image",
+  audio: "mediaType.audio",
+} as const;
 
 const EXTENSIONS: Record<MediaType, string[]> = {
   video: ["mp4", "webm", "ogg", "mov", "mkv", "m3u8"],
@@ -38,29 +45,43 @@ export default function UrlInput({
   onSubmit,
 }: {
   type: MediaType;
-  onSubmit: (url: string) => void;
+  onSubmit: (url: string) => void | Promise<void>;
 }) {
+  const { t } = useTwickI18n();
   const [url, setUrl] = useState("");
   const [error, setError] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const localizedType = t(mediaTypeLabelKey[type]);
 
   const tryAdd = async () => {
     const trimmed = url.trim();
     if (!trimmed) return;
 
     if (!isValidUrl(trimmed)) {
-      setError("Enter a valid URL");
+      setError(t("urlInput.invalidUrl"));
       return;
     }
 
     if (!matchesType(trimmed, type)) {
-      setError(`URL must be a ${type} (${EXTENSIONS[type].join(", ")})`);
+      setError(
+        t("urlInput.invalidType", {
+          type: localizedType,
+          extensions: EXTENSIONS[type].join(", "),
+        }),
+      );
       return;
     }
 
     setError("");
-
-    onSubmit(trimmed);
-    setUrl("");
+    setIsSubmitting(true);
+    try {
+      await onSubmit(trimmed);
+      setUrl("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("urlInput.invalidUrl"));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
@@ -75,16 +96,18 @@ export default function UrlInput({
       <div className="flex-container">
         <input
           type="url"
-          placeholder={`Paste ${type} URL...`}
+          placeholder={t("urlInput.placeholder", { type: localizedType })}
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           onKeyDown={onKeyDown}
+          disabled={isSubmitting}
           className="input w-full"
         />
         <button
           className="btn-ghost"
           onClick={() => void tryAdd()}
-          aria-label={`Add ${type} by URL`}
+          disabled={isSubmitting}
+          aria-label={t("urlInput.addByUrl", { type: localizedType })}
         >
           <Plus size={16} />
         </button>

@@ -4,6 +4,7 @@ import { ImageElement, VideoElement } from "@twick/timeline";
 import { useLivePlayerContext } from "@twick/live-player";
 import type { StudioConfig } from "../../types";
 import type { ModelInfo } from "@twick/ai-models";
+import { useTwickI18n } from "@twick/video-editor";
 
 const DEFAULT_IMAGE_DURATION = 5;
 
@@ -20,6 +21,7 @@ export function GenerateMediaPanelContainer({
   addElement,
   studioConfig,
 }: GenerateMediaPanelContainerProps): React.ReactElement {
+  const { t } = useTwickI18n();
   const { getCurrentTime } = useLivePlayerContext();
   const [tab, setTab] = useState<"image" | "video">("image");
   const [prompt, setPrompt] = useState("");
@@ -78,7 +80,7 @@ export function GenerateMediaPanelContainer({
             clearInterval(interval);
             setIsGenerating(false);
             setStatus(null);
-            setError(result.error ?? "Generation failed");
+            setError(result.error ?? t("generateMedia.generationFailed"));
           }
         } catch {
           // Keep polling
@@ -92,29 +94,29 @@ export function GenerateMediaPanelContainer({
 
   const handleGenerate = useCallback(async () => {
     if (!prompt.trim()) {
-      setError("Enter a prompt");
+      setError(t("generateMedia.enterPrompt"));
       return;
     }
 
     if (tab === "image" && !imageService) {
-      setError("Image generation not configured");
+      setError(t("generateMedia.imageNotConfigured"));
       return;
     }
     if (tab === "video" && !videoService) {
-      setError("Video generation not configured");
+      setError(t("generateMedia.videoNotConfigured"));
       return;
     }
 
     setIsGenerating(true);
     setError(null);
-    setStatus("Starting...");
+    setStatus(t("generateMedia.starting"));
 
     try {
       const endpointId = selectedEndpointId || defaultEndpointId;
       const provider = selectedProvider;
 
       if (!endpointId || !provider) {
-        setError("No model is configured for this tab");
+        setError(t("generateMedia.noModelConfigured"));
         setIsGenerating(false);
         setStatus(null);
         return;
@@ -127,7 +129,7 @@ export function GenerateMediaPanelContainer({
           prompt: prompt.trim(),
         });
         if (requestId) {
-          setStatus("Generating image...");
+          setStatus(t("generateMedia.generatingImage"));
           pollStatus(requestId);
         }
       } else if (tab === "video" && videoService) {
@@ -137,12 +139,13 @@ export function GenerateMediaPanelContainer({
           prompt: prompt.trim(),
         });
         if (requestId) {
-          setStatus("Generating video (this may take several minutes)...");
+          setStatus(t("generateMedia.generatingVideo"));
           pollStatus(requestId);
         }
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Generation failed";
+      const msg =
+        err instanceof Error ? err.message : t("generateMedia.generationFailed");
       setError(msg);
       setIsGenerating(false);
       setStatus(null);
@@ -162,8 +165,7 @@ export function GenerateMediaPanelContainer({
     return (
       <div className="panel-container">
         <p className="empty-state-text">
-          Image and video generation require configuration. Add imageGenerationService
-          and videoGenerationService to StudioConfig.
+          {t("generateMedia.notConfigured")}
         </p>
       </div>
     );
@@ -179,7 +181,7 @@ export function GenerateMediaPanelContainer({
             onClick={() => setTab("image")}
             disabled={!imageService}
           >
-            Image
+            {t("generateMedia.imageTab")}
           </button>
           <button
             type="button"
@@ -187,12 +189,12 @@ export function GenerateMediaPanelContainer({
             onClick={() => setTab("video")}
             disabled={!videoService}
           >
-            Video
+            {t("generateMedia.videoTab")}
           </button>
         </div>
 
         <div className="mb-2">
-          <label className="block text-sm mb-1">Model</label>
+          <label className="block text-sm mb-1">{t("generateMedia.model")}</label>
           <select
             className="w-full p-2 border rounded"
             value={selectedEndpointId}
@@ -208,12 +210,12 @@ export function GenerateMediaPanelContainer({
         </div>
 
         <div className="mb-2">
-          <label className="block text-sm mb-1">Prompt</label>
+          <label className="block text-sm mb-1">{t("generateMedia.prompt")}</label>
           <textarea
             className="w-full p-2 border rounded min-h-[80px]"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Describe the image or video you want..."
+            placeholder={t("generateMedia.promptPlaceholder")}
             disabled={isGenerating}
           />
         </div>
@@ -232,7 +234,11 @@ export function GenerateMediaPanelContainer({
           onClick={handleGenerate}
           disabled={isGenerating || !prompt.trim()}
         >
-          {isGenerating ? "Generating..." : `Generate ${tab}`}
+          {isGenerating
+            ? t("generateMedia.generating")
+            : tab === "image"
+            ? t("generateMedia.generateImage")
+            : t("generateMedia.generateVideo")}
         </button>
       </div>
     </div>

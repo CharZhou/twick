@@ -1,10 +1,14 @@
 import { useCallback, useState } from "react";
 
-export type CloudUploadProvider = "s3" | "gcs";
+export type CloudUploadProvider = "s3" | "gcs" | "aether";
 
 export interface UseCloudMediaUploadConfig {
   uploadApiUrl: string;
   provider: CloudUploadProvider;
+  importApiUrl?: string;
+  directory?: string;
+  apiKey?: string;
+  userToken?: string;
 }
 
 /** Response from S3 presign API (e.g. file-uploader Lambda). */
@@ -21,6 +25,20 @@ export interface GCSUploadResponse {
   url: string;
 }
 
+export interface AetherUploadResponse {
+  code: number;
+  msg: string;
+  data: {
+    url: string;
+  } | null;
+}
+
+export interface AetherImportFileParams {
+  sourceUrl: string;
+  fileName?: string;
+  contentType?: string;
+}
+
 export interface UseCloudMediaUploadReturn {
   uploadFile: (file: File) => Promise<{ url: string }>;
   isUploading: boolean;
@@ -28,6 +46,58 @@ export interface UseCloudMediaUploadReturn {
   error: string | null;
   resetError: () => void;
 }
+
+const buildAetherHeaders = (config: UseCloudMediaUploadConfig) => {
+  if (!config.apiKey || !config.userToken) {
+    throw new Error("Aether upload requires apiKey and userToken");
+  }
+
+  return {
+    Authorization: `Bearer ${config.apiKey}`,
+    "X-User-Token": config.userToken,
+  };
+};
+
+const ensureAetherUploadSuccess = (data: AetherUploadResponse) => {
+  if (data.code !== 0 || !data.data?.url) {
+    throw new Error(data.msg || "Aether upload failed");
+  }
+
+  return data.data.url;
+};
+
+export const importFileFromUrl = async (
+  config: UseCloudMediaUploadConfig,
+  params: AetherImportFileParams
+): Promise<{ url: string }> => {
+  if (config.provider !== "aether") {
+    return { url: params.sourceUrl };
+  }
+
+  const importApiUrl =
+    config.importApiUrl ?? config.uploadApiUrl.replace(/\/upload$/, "/import");
+
+  const response = await fetch(importApiUrl, {
+    method: "POST",
+    headers: {
+      ...buildAetherHeaders(config),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      sourceUrl: params.sourceUrl,
+      fileName: params.fileName,
+      contentType: params.contentType,
+      directory: config.directory,
+    }),
+  });
+
+  const result = (await response.json().catch(() => ({}))) as AetherUploadResponse;
+  if (!response.ok) {
+    throw new Error(result.msg || `Import failed: ${response.statusText}`);
+  }
+
+  return { url: ensureAetherUploadSuccess(result) };
+};
 
 const putFileWithProgress = (
   uploadUrl: string,
@@ -133,6 +203,29 @@ export const useCloudMediaUpload = (
           return { url: data.url };
         }
 
+        if (provider === "aether") {
+          setProgress(10);
+          const formData = new FormData();
+          formData.append("file", file);
+          if (config.directory) {
+            formData.append("directory", config.directory);
+          }
+
+          const uploadRes = await fetch(uploadApiUrl, {
+            method: "POST",
+            headers: buildAetherHeaders(config),
+            body: formData,
+          });
+
+          const result = (await uploadRes.json().catch(() => ({}))) as AetherUploadResponse;
+          if (!uploadRes.ok) {
+            throw new Error(result.msg || `Upload failed: ${uploadRes.statusText}`);
+          }
+
+          setProgress(100);
+          return { url: ensureAetherUploadSuccess(result) };
+        }
+
         throw new Error(`Unknown provider: ${provider}`);
       } catch (err) {
         const message =
@@ -144,7 +237,7 @@ export const useCloudMediaUpload = (
         setProgress(0);
       }
     },
-    [uploadApiUrl, provider]
+    [config, uploadApiUrl, provider]
   );
 
   return {

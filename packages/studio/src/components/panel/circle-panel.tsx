@@ -39,6 +39,7 @@ import type {
   CirclePanelState,
   CirclePanelActions,
 } from "../../hooks/use-circle-panel";
+import { useTwickI18n } from "@twick/video-editor";
 
 export type CirclePanelProps = CirclePanelState & CirclePanelActions;
 
@@ -54,12 +55,13 @@ export function CirclePanel({
   setLineWidth,
   handleApplyChanges,
 }: CirclePanelProps) {
+  const { t } = useTwickI18n();
   return (
     <div className="panel-container">
-      <div className="panel-title">Circle</div>
+      <div className="panel-title">{t("circlePanel.title")}</div>
       {/* Radius */}
       <div className="panel-section">
-        <label className="label-dark">Radius</label>
+        <label className="label-dark">{t("circlePanel.radius")}</label>
         <div className="slider-container">
           <input
             type="range"
@@ -75,7 +77,7 @@ export function CirclePanel({
 
       {/* Fill Color */}
       <div className="panel-section">
-        <label className="label-dark">Fill Color</label>
+        <label className="label-dark">{t("circlePanel.fillColor")}</label>
         <div className="color-inputs">
           <input
             type="color"
@@ -95,7 +97,7 @@ export function CirclePanel({
 
       {/* Stroke Color */}
       <div className="panel-section">
-        <label className="label-dark">Stroke Color</label>
+        <label className="label-dark">{t("circlePanel.strokeColor")}</label>
         <div className="color-inputs">
           <input
             type="color"
@@ -114,7 +116,7 @@ export function CirclePanel({
 
       {/* Line Width */}
       <div className="panel-section">
-        <label className="label-dark">Line Width</label>
+        <label className="label-dark">{t("circlePanel.lineWidth")}</label>
         <div className="slider-container">
           <input
             type="range"
@@ -132,7 +134,7 @@ export function CirclePanel({
       {operation !== "Apply Changes" && (
         <div className="flex panel-section">
           <button onClick={handleApplyChanges} className="btn-primary w-full">
-            {operation}
+            {operation === "Add Circle" ? t("circlePanel.addCircle") : operation}
           </button>
         </div>
       )}

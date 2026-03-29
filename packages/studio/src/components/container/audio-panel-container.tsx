@@ -3,13 +3,19 @@ import { useMediaPanel } from "../../hooks/use-media-panel";
 import { AudioPanel } from "../panel/audio-panel";
 import type { PanelProps } from "../../types";
 import { useMedia } from "../../context/media-context";
-import { getMediaManager, CloudMediaUpload } from "../shared";
+import { getMediaManager, CloudMediaUpload, FileInput } from "../shared";
 import SearchInput from "../shared/search-input";
-import type { AssetProviderConfig, MediaItem } from "@twick/video-editor";
+import {
+  type AssetProviderConfig,
+  type MediaItem,
+  useTwickI18n,
+} from "@twick/video-editor";
 import { getAssetLibrary } from "../../helpers/asset-library";
 import { throttle } from "@twick/video-editor";
+import { importFileFromUrl } from "../../hooks/use-cloud-media-upload";
 
 export const AudioPanelContainer = (props: PanelProps) => {
+  const { t } = useTwickI18n();
   const [activeSource, setActiveSource] = useState<"user" | "public">("user");
 
   return (
@@ -22,7 +28,7 @@ export const AudioPanelContainer = (props: PanelProps) => {
               }`}
             onClick={() => setActiveSource("user")}
           >
-            My assets
+            {t("common.myAssets")}
           </button>
           <button
             type="button"
@@ -30,7 +36,7 @@ export const AudioPanelContainer = (props: PanelProps) => {
               }`}
             onClick={() => setActiveSource("public")}
           >
-            Public
+            {t("common.public")}
           </button>
         </div>
       </div>
@@ -45,6 +51,7 @@ export const AudioPanelContainer = (props: PanelProps) => {
 };
 
 function AudioUserAssetsSection(props: PanelProps) {
+  const { t } = useTwickI18n();
   const { addItem } = useMedia("audio");
   const mediaManager = getMediaManager();
   const {
@@ -76,11 +83,33 @@ function AudioUserAssetsSection(props: PanelProps) {
       }
     })();
 
+    const finalUrl =
+      props.uploadConfig?.provider === "aether"
+        ? (
+            await importFileFromUrl(
+              {
+                uploadApiUrl: props.uploadConfig.uploadApiUrl,
+                importApiUrl: props.uploadConfig.importApiUrl,
+                provider: props.uploadConfig.provider,
+                directory: props.uploadConfig.directory,
+                apiKey: props.uploadConfig.apiKey,
+                userToken: props.uploadConfig.userToken,
+              },
+              {
+                sourceUrl: url,
+                fileName: nameFromUrl,
+              },
+            )
+          ).url
+        : url;
+
     const newItem = await mediaManager.addItem({
       name: nameFromUrl,
-      url,
+      url: finalUrl,
       type: "audio",
-      metadata: { source: "url" },
+      metadata: {
+        source: props.uploadConfig?.provider === "aether" ? "aether" : "url",
+      },
     });
     addItem(newItem);
   };
@@ -97,14 +126,29 @@ function AudioUserAssetsSection(props: PanelProps) {
 
   return (
     <>
+      {!props.uploadConfig && (
+        <div className="flex gap-2 panel-section">
+          <FileInput
+            acceptFileTypes={acceptFileTypes}
+            onFileLoad={handleFileUpload}
+            buttonText={t("common.importAudio")}
+            id="studio-audio-file-input"
+            className="btn-ghost w-full file-input-label"
+          />
+        </div>
+      )}
       {props.uploadConfig && (
         <div className="flex panel-section">
           <CloudMediaUpload
             uploadApiUrl={props.uploadConfig.uploadApiUrl}
+            importApiUrl={props.uploadConfig.importApiUrl}
             provider={props.uploadConfig.provider}
+            directory={props.uploadConfig.directory}
+            apiKey={props.uploadConfig.apiKey}
+            userToken={props.uploadConfig.userToken}
             accept="audio/*"
             onSuccess={onCloudUploadSuccess}
-            buttonText="Upload audio"
+            buttonText={t("common.uploadAudio")}
             className="btn-ghost w-full"
           />
         </div>
@@ -124,6 +168,7 @@ function AudioUserAssetsSection(props: PanelProps) {
 }
 
 function AudioPublicAssetsSection() {
+  const { t } = useTwickI18n();
   const assetLibrary = getAssetLibrary();
   const [providerConfigs, setProviderConfigs] = useState<AssetProviderConfig[]>(
     [],
@@ -186,7 +231,7 @@ function AudioPublicAssetsSection() {
       <div className="panel-section">
         <div className="property-row">
           <div className="property-row-label">
-            <span className="property-label">Provider</span>
+            <span className="property-label">{t("common.provider")}</span>
           </div>
           <div className="property-row-control">
             <select
@@ -196,7 +241,7 @@ function AudioPublicAssetsSection() {
                 setActiveProviderId(e.target.value as string | "all")
               }
             >
-              <option value="all">All providers</option>
+              <option value="all">{t("common.allProviders")}</option>
               {providerConfigs
                 .filter((p) => p.enabled)
                 .map((p) => (

@@ -4,11 +4,13 @@ import { AccordionItem } from "../shared/accordion-item";
 import { PropertyRow } from "./property-row";
 import { Type, AlignLeft, AlignCenter, AlignRight, Bold, Italic } from "lucide-react";
 import { useState } from "react";
+import { useTwickI18n } from "@twick/video-editor";
 
 export function TextPropsPanel({
   selectedElement,
   updateElement,
 }: PropertiesPanelProps) {
+  const { t } = useTwickI18n();
   if (!(selectedElement instanceof TextElement)) return null;
 
   const textProps = selectedElement.getProps() || {};
@@ -41,9 +43,9 @@ export function TextPropsPanel({
 
   return (
     <div className="panel-container">
-      <div className="panel-title">Typography</div>
+      <div className="panel-title">{t("textProps.title")}</div>
       <AccordionItem
-        title="Typography"
+        title={t("textProps.typography")}
         icon={<Type className="icon-sm" />}
         isOpen={isTypographyOpen}
         onToggle={() => setIsTypographyOpen((open) => !open)}
@@ -52,7 +54,7 @@ export function TextPropsPanel({
           {/* Font size */}
           <div className="property-section">
             <PropertyRow
-              label="Font size"
+              label={t("textProps.fontSize")}
               secondary={<span>{textProps.fontSize ?? 48}px</span>}
             >
               <input
@@ -70,12 +72,12 @@ export function TextPropsPanel({
 
           {/* Style: bold / italic */}
           <div className="property-section">
-            <PropertyRow label="Style">
+            <PropertyRow label={t("textProps.style")}>
               <button
                 type="button"
                 className={`form-btn ${isBold ? "active" : ""}`}
                 onClick={toggleBold}
-                title="Bold"
+                title={t("textProps.bold")}
               >
                 <Bold className="icon-sm" />
               </button>
@@ -83,7 +85,7 @@ export function TextPropsPanel({
                 type="button"
                 className={`form-btn ${isItalic ? "active" : ""}`}
                 onClick={toggleItalic}
-                title="Italic"
+                title={t("textProps.italic")}
               >
                 <Italic className="icon-sm" />
               </button>
@@ -92,12 +94,12 @@ export function TextPropsPanel({
 
           {/* Alignment */}
           <div className="property-section">
-            <PropertyRow label="Align">
+            <PropertyRow label={t("textProps.align")}>
               <button
                 type="button"
                 className={`form-btn ${currentAlign === "left" ? "active" : ""}`}
                 onClick={() => setAlign("left")}
-                title="Align left"
+                title={t("textProps.alignLeft")}
               >
                 <AlignLeft className="icon-sm" />
               </button>
@@ -107,7 +109,7 @@ export function TextPropsPanel({
                   currentAlign === "center" ? "active" : ""
                 }`}
                 onClick={() => setAlign("center")}
-                title="Align center"
+                title={t("textProps.alignCenter")}
               >
                 <AlignCenter className="icon-sm" />
               </button>
@@ -117,7 +119,7 @@ export function TextPropsPanel({
                   currentAlign === "right" ? "active" : ""
                 }`}
                 onClick={() => setAlign("right")}
-                title="Align right"
+                title={t("textProps.alignRight")}
               >
                 <AlignRight className="icon-sm" />
               </button>
@@ -129,4 +131,3 @@ export function TextPropsPanel({
     </div>
   );
 }
-

@@ -1,11 +1,13 @@
 import { ANIMATIONS } from "@twick/video-editor";
 import { ElementAnimation, TrackElement } from "@twick/timeline";
 import type { PropertiesPanelProps } from "../../types";
+import { useTwickI18n } from "@twick/video-editor";
 
 export function Animation({
   selectedElement,
   updateElement,
 }: PropertiesPanelProps) {
+  const { t } = useTwickI18n();
   if (!(selectedElement instanceof TrackElement)) return null;
 
   const currentAnimation = selectedElement?.getAnimation();
@@ -87,16 +89,16 @@ export function Animation({
 
   return (
     <div className="panel-container">
-      <div className="panel-title">Animations</div>
+      <div className="panel-title">{t("animation.title")}</div>
       {/* Animation Selection */}
       <div className="panel-section">
-        <label className="label-dark">Type</label>
+        <label className="label-dark">{t("animation.type")}</label>
         <select
           value={currentAnimation?.getName() || ""}
           onChange={(e) => handleUpdateAnimation({ name: e.target.value })}
           className="select-dark w-full"
         >
-          <option value="">No Animation</option>
+          <option value="">{t("animation.noAnimation")}</option>
           {ANIMATIONS.map((animation) => (
             <option key={animation.name} value={animation.name}>
               {animation.name.charAt(0).toUpperCase() + animation.name.slice(1)}
@@ -120,7 +122,7 @@ export function Animation({
                   {/* Animate */}
                   {animationDef.options?.animate && (
                     <div className="panel-section">
-                      <label className="label-dark">When to Animate</label>
+                      <label className="label-dark">{t("animation.whenToAnimate")}</label>
                       <select
                         value={currentAnimation.getAnimate()}
                         onChange={(e) =>
@@ -145,7 +147,7 @@ export function Animation({
                   {/* Direction */}
                   {animationDef.options?.direction && (
                     <div className="panel-section">
-                      <label className="label-dark">Direction</label>
+                      <label className="label-dark">{t("animation.direction")}</label>
                       <select
                         value={currentAnimation.getDirection()}
                         onChange={(e) =>
@@ -172,7 +174,7 @@ export function Animation({
                   {/* Mode */}
                   {animationDef.options?.mode && (
                     <div className="panel-section">
-                      <label className="label-dark">Mode</label>
+                      <label className="label-dark">{t("animation.mode")}</label>
                       <select
                         value={currentAnimation.getMode()}
                         onChange={(e) =>
@@ -194,7 +196,7 @@ export function Animation({
                   {/* Duration */}
                   {animationDef.options?.duration && (
                     <div className="panel-section">
-                      <label className="label-dark">Duration (seconds)</label>
+                      <label className="label-dark">{t("animation.duration")}</label>
                       <div className="slider-container">
                         <input
                           type="range"
@@ -217,7 +219,7 @@ export function Animation({
                   {/* Interval */}
                   {animationDef.options?.interval && (
                     <div className="panel-section">
-                      <label className="label-dark">Interval (seconds)</label>
+                      <label className="label-dark">{t("animation.interval")}</label>
                       <div className="slider-container">
                         <input
                           type="range"
@@ -240,7 +242,7 @@ export function Animation({
                   {/* Intensity */}
                   {animationDef.options?.intensity && (
                     <div className="panel-section">
-                      <label className="label-dark">Intensity</label>
+                      <label className="label-dark">{t("animation.intensity")}</label>
                       <div className="slider-container">
                         <input
                           type="range"

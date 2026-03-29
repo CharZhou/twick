@@ -34,6 +34,7 @@
 
 import { Trash2, Scissors } from "lucide-react";
 import type { CaptionPanelEntry } from "../../types";
+import { useTwickI18n } from "@twick/video-editor";
 
 const formatTime = (seconds: number) => {
   if (!Number.isFinite(seconds) || seconds < 0) return "0:00.00";
@@ -59,21 +60,22 @@ export function CaptionsPanel({
   deleteCaption: (index: number) => void;
   updateCaption: (index: number, caption: CaptionPanelEntry) => void;
 }) {
+  const { t } = useTwickI18n();
   return (
     <div className="panel-container captions-panel">
       {/* Header */}
       <div className="captions-panel-header">
-        <h3 className="panel-title">Captions</h3>
+        <h3 className="panel-title">{t("captions.title")}</h3>
         <div className="captions-panel-header-meta">
           {captions.length === 0 ? (
-            <span className="captions-panel-count">No captions yet</span>
+            <span className="captions-panel-count">{t("captions.noneYet")}</span>
           ) : null}
           <button
             onClick={addCaption}
             className="btn-primary captions-panel-add-button"
-            title="Add caption"
+            title={t("captions.add")}
           >
-            Add caption
+            {t("captions.add")}
           </button>
         </div>
       </div>
@@ -81,16 +83,16 @@ export function CaptionsPanel({
       {/* Caption list */}
       {captions.length === 0 ? (
         <div className="panel-section captions-panel-empty">
-          <p className="captions-panel-empty-title">Start your first caption</p>
+          <p className="captions-panel-empty-title">{t("captions.startFirst")}</p>
           <p className="captions-panel-empty-subtitle">
-            Use the button above to add the first caption block for the active track.
+            {t("captions.startFirstHelp")}
           </p>
           <button
             onClick={addCaption}
             className="btn-primary captions-panel-empty-button"
-            title="Add first caption"
+            title={t("captions.addFirst")}
           >
-            Add caption
+            {t("captions.add")}
           </button>
         </div>
       ) : (
@@ -111,16 +113,16 @@ export function CaptionsPanel({
                   {caption.isCustom ? (
                     <span
                       className="captions-panel-custom"
-                      title="This caption overrides track defaults"
+                      title={t("captions.customTitle")}
                     >
-                      Custom
+                      {t("captions.custom")}
                     </span>
                   ) : null}
                 </div>
 
                 <div className="captions-panel-item-body">
                   <textarea
-                    placeholder="Enter caption text"
+                    placeholder={t("captions.enterText")}
                     value={caption.t}
                     onChange={(e) =>
                       updateCaption(i, { ...caption, t: e.target.value })
@@ -131,14 +133,14 @@ export function CaptionsPanel({
                     <button
                       onClick={() => splitCaption(i)}
                       className="btn-ghost captions-panel-action-button"
-                      title="Split caption at midpoint"
+                      title={t("captions.split")}
                     >
                       <Scissors className="icon-sm" />
                     </button>
                     <button
                       onClick={() => deleteCaption(i)}
                       className="btn-ghost captions-panel-action-button"
-                      title="Delete caption"
+                      title={t("captions.delete")}
                     >
                       <Trash2
                         className="icon-sm"

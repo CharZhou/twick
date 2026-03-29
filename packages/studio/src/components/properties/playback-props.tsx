@@ -4,6 +4,7 @@ import { AccordionItem } from "../shared/accordion-item";
 import { PropertyRow } from "./property-row";
 import { Music2 } from "lucide-react";
 import { useState } from "react";
+import { useTwickI18n } from "@twick/video-editor";
 
 const PLAYBACK_RATE_MIN = 0.25;
 const PLAYBACK_RATE_MAX = 2;
@@ -13,6 +14,7 @@ export function PlaybackPropsPanel({
   selectedElement,
   updateElement,
 }: PropertiesPanelProps) {
+  const { t } = useTwickI18n();
   const elementProps = selectedElement?.getProps() || {};
   const volumeLinear = elementProps.volume ?? 1;
   const volumeDb = linearToDb(volumeLinear);
@@ -36,9 +38,9 @@ export function PlaybackPropsPanel({
 
   return (
     <div className="panel-container">
-      <div className="panel-title">Playback</div>
+      <div className="panel-title">{t("playback.title")}</div>
       <AccordionItem
-        title="Playback"
+        title={t("playback.section")}
         icon={<Music2 className="icon-sm" />}
         isOpen={isPlaybackOpen}
         onToggle={() => setIsPlaybackOpen((open) => !open)}
@@ -47,7 +49,7 @@ export function PlaybackPropsPanel({
           {/* Playback rate */}
           <div className="property-section">
             <PropertyRow
-              label="Playback rate"
+              label={t("playback.rate")}
               secondary={<span>{playbackRate}×</span>}
             >
               <input
@@ -67,7 +69,7 @@ export function PlaybackPropsPanel({
           {/* Volume (dB) */}
           <div className="property-section">
             <PropertyRow
-              label="Volume"
+              label={t("playback.volume")}
               secondary={
                 <span>
                   {volumeDb <= MIN_DB ? "−∞" : `${Math.round(volumeDb)} dB`}

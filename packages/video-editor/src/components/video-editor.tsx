@@ -9,6 +9,7 @@ import {
   DEFAULT_ELEMENT_COLORS,
 } from "../helpers/constants";
 import { CanvasConfig, ElementColors } from "../helpers/types";
+import { TwickI18nProvider } from "../i18n/i18n-context";
 
 /**
  * Configuration for timeline tick marks at specific duration ranges.
@@ -220,30 +221,32 @@ const VideoEditor: React.FC<VideoEditorProps> = ({
     [editorConfig]
   );
   return (
-    <div className="twick-editor-main-container">
-      <div className="twick-editor-view-section">
-        {leftPanel ? leftPanel : <div />}
-        {useMemoizedPlayerManager}
-        {rightPanel ? rightPanel : <div />}
-      </div>
-      {bottomPanel ? bottomPanel : null}
-      <div className="twick-editor-timeline-section">
-        {defaultPlayControls ? (
-          <ControlManager
-            trackZoom={trackZoom}
-            setTrackZoom={setTrackZoom}
-            zoomConfig={zoomConfig}
-            fps={editorConfig.fps}
-          />
-        ) : null}
+    <TwickI18nProvider>
+      <div className="twick-editor-main-container">
+        <div className="twick-editor-view-section">
+          {leftPanel ? leftPanel : <div />}
+          {useMemoizedPlayerManager}
+          {rightPanel ? rightPanel : <div />}
+        </div>
+        {bottomPanel ? bottomPanel : null}
+        <div className="twick-editor-timeline-section">
+          {defaultPlayControls ? (
+            <ControlManager
+              trackZoom={trackZoom}
+              setTrackZoom={setTrackZoom}
+              zoomConfig={zoomConfig}
+              fps={editorConfig.fps}
+            />
+          ) : null}
 
-        <TimelineManager
-          trackZoom={trackZoom}
-          timelineTickConfigs={timelineTickConfigs}
-          elementColors={elementColors}
-        />
+          <TimelineManager
+            trackZoom={trackZoom}
+            timelineTickConfigs={timelineTickConfigs}
+            elementColors={elementColors}
+          />
+        </div>
       </div>
-    </div>
+    </TwickI18nProvider>
   );
 };
 
