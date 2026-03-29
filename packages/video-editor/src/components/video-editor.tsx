@@ -1,7 +1,7 @@
 import { PlayerManager } from "./player/player-manager";
 import TimelineManager from "./timeline/timeline-manager";
 import "../styles/video-editor.css";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ControlManager from "./controls/control-manager";
 import {
   DEFAULT_TIMELINE_ZOOM_CONFIG,
@@ -10,6 +10,11 @@ import {
 } from "../helpers/constants";
 import { CanvasConfig, ElementColors } from "../helpers/types";
 import { TwickI18nProvider } from "../i18n/i18n-context";
+
+const DEFAULT_TIMELINE_SECTION_HEIGHT = 220;
+const MIN_TIMELINE_SECTION_HEIGHT = 160;
+const MIN_VIEW_SECTION_HEIGHT = 220;
+const RESIZER_HEIGHT = 12;
 
 /**
  * Configuration for timeline tick marks at specific duration ranges.
@@ -208,6 +213,143 @@ const VideoEditor: React.FC<VideoEditorProps> = ({
   );
 
   const [trackZoom, setTrackZoom] = useState(zoomConfig.default);
+  const mainContainerRef = useRef<HTMLDivElement>(null);
+  const resizeStateRef = useRef<{
+    containerTop: number;
+    containerHeight: number;
+  } | null>(null);
+  const [timelineSectionHeight, setTimelineSectionHeight] = useState(
+    DEFAULT_TIMELINE_SECTION_HEIGHT,
+  );
+
+  const clampTimelineSectionHeight = useCallback((nextHeight: number) => {
+    const containerHeight = mainContainerRef.current?.clientHeight ?? 0;
+
+    if (containerHeight <= 0) {
+      return Math.max(nextHeight, MIN_TIMELINE_SECTION_HEIGHT);
+    }
+
+    const maxTimelineHeight = Math.max(
+      MIN_TIMELINE_SECTION_HEIGHT,
+      containerHeight - MIN_VIEW_SECTION_HEIGHT - RESIZER_HEIGHT,
+    );
+
+    return Math.min(
+      Math.max(nextHeight, MIN_TIMELINE_SECTION_HEIGHT),
+      maxTimelineHeight,
+    );
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    resizeStateRef.current = null;
+    document.body.style.cursor = "";
+    document.body.style.userSelect = "";
+  }, []);
+
+  const resizeFromClientY = useCallback(
+    (clientY: number) => {
+      if (!resizeStateRef.current) {
+        return;
+      }
+
+      const { containerTop, containerHeight } = resizeStateRef.current;
+      const nextViewHeight = clientY - containerTop;
+      const nextTimelineHeight =
+        containerHeight - nextViewHeight - RESIZER_HEIGHT;
+
+      setTimelineSectionHeight(clampTimelineSectionHeight(nextTimelineHeight));
+    },
+    [clampTimelineSectionHeight],
+  );
+
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      resizeFromClientY(event.clientY);
+    };
+
+    const handleMouseUp = () => {
+      stopResizing();
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      if (!resizeStateRef.current || event.touches.length === 0) {
+        return;
+      }
+
+      resizeFromClientY(event.touches[0].clientY);
+      event.preventDefault();
+    };
+
+    const handleTouchEnd = () => {
+      stopResizing();
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [resizeFromClientY, stopResizing]);
+
+  useEffect(() => {
+    const container = mainContainerRef.current;
+    if (!container || typeof ResizeObserver === "undefined") {
+      return;
+    }
+
+    const observer = new ResizeObserver(() => {
+      setTimelineSectionHeight((current) =>
+        clampTimelineSectionHeight(current),
+      );
+    });
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [clampTimelineSectionHeight]);
+
+  const startResizing = useCallback((clientY: number) => {
+      const container = mainContainerRef.current;
+      if (!container) {
+        return;
+      }
+
+      const rect = container.getBoundingClientRect();
+      resizeStateRef.current = {
+        containerTop: rect.top,
+        containerHeight: rect.height,
+      };
+      document.body.style.cursor = "row-resize";
+      document.body.style.userSelect = "none";
+      resizeFromClientY(clientY);
+    },
+    [resizeFromClientY],
+  );
+
+  const handleResizerMouseDown = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      startResizing(event.clientY);
+      event.preventDefault();
+    },
+    [startResizing],
+  );
+
+  const handleResizerTouchStart = useCallback(
+    (event: React.TouchEvent<HTMLDivElement>) => {
+      if (event.touches.length === 0) {
+        return;
+      }
+
+      startResizing(event.touches[0].clientY);
+      event.preventDefault();
+    },
+    [startResizing],
+  );
 
   const useMemoizedPlayerManager = useMemo(
     () => (
@@ -222,14 +364,26 @@ const VideoEditor: React.FC<VideoEditorProps> = ({
   );
   return (
     <TwickI18nProvider>
-      <div className="twick-editor-main-container">
+      <div className="twick-editor-main-container" ref={mainContainerRef}>
         <div className="twick-editor-view-section">
           {leftPanel ? leftPanel : <div />}
           {useMemoizedPlayerManager}
           {rightPanel ? rightPanel : <div />}
         </div>
+        <div
+          className="twick-editor-section-resizer"
+          onMouseDown={handleResizerMouseDown}
+          onTouchStart={handleResizerTouchStart}
+          role="separator"
+          aria-orientation="horizontal"
+        >
+          <div className="twick-editor-section-resizer-handle" />
+        </div>
         {bottomPanel ? bottomPanel : null}
-        <div className="twick-editor-timeline-section">
+        <div
+          className="twick-editor-timeline-section"
+          style={{ height: `${timelineSectionHeight}px` }}
+        >
           {defaultPlayControls ? (
             <ControlManager
               trackZoom={trackZoom}
