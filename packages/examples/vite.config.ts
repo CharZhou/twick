@@ -18,10 +18,10 @@ export default defineConfig({
       },
     },
   ],
-  
+
   // Monorepo-specific: Use shared cache directory
   cacheDir: '../../node_modules/.vite',
-  
+
   // Exclude FFmpeg from dependency optimization (has workers)
   optimizeDeps: {
     exclude: [
@@ -30,13 +30,13 @@ export default defineConfig({
       '@ffmpeg/core'
     ]
   },
-  
+
   // Worker configuration for FFmpeg
   worker: {
     format: 'es',
     plugins: () => []
   },
-  
+
   preview: {
     port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
     host: '0.0.0.0',
