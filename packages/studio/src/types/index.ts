@@ -1,5 +1,6 @@
 import type { ProjectJSON, Size, TrackElement, VideoElement } from "@twick/timeline"
 import type { ComponentType } from "react";
+import type { WorkbenchProjectMetadata } from "../helpers/workbench";
 
 export type {
   IImageGenerationService,
@@ -18,6 +19,11 @@ export type {
   GenerateVideoParams,
 } from "./generation"
 import type { CanvasConfig, VideoEditorConfig } from "@twick/video-editor"
+
+export interface StudioWorkbenchConfig {
+  kind: "digital-human-sales";
+  mode: "standalone" | "embed";
+}
 
 export interface MediaItem {
   id: string
@@ -159,6 +165,10 @@ export interface ProjectTemplate {
 export interface StudioConfig extends VideoEditorConfig {
   /** Canvas behavior options (e.g. enableShiftAxisLock). Same as editorConfig.canvasConfig in TwickEditor. */
   canvasConfig?: CanvasConfig;
+  /** Whether the default Studio header should be shown. Defaults to true. */
+  showHeader?: boolean;
+  /** Optional workbench mode for training/embedded experiences. */
+  workbench?: StudioWorkbenchConfig;
   saveProject?: (project: ProjectJSON, fileName: string) => Promise<Result>;
   loadProject?: () => Promise<ProjectJSON>;
   /**
@@ -193,6 +203,10 @@ export interface StudioConfig extends VideoEditorConfig {
   /** Optional project templates shown in Template Gallery. */
   templates?: ProjectTemplate[];
 }
+
+export type {
+  WorkbenchProjectMetadata,
+};
 
 export interface PanelProps {
   selectedElement?: TrackElement | null;

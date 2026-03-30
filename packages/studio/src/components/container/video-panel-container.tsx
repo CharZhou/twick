@@ -9,10 +9,27 @@ import type { AssetProviderConfig, MediaItem } from "@twick/video-editor";
 import { throttle, useTwickI18n } from "@twick/video-editor";
 import { getAssetLibrary } from "../../helpers/asset-library";
 import { importFileFromUrl } from "../../hooks/use-cloud-media-upload";
+import { useTimelineContext } from "@twick/timeline";
+import {
+  isDigitalHumanSalesWorkbench,
+  setMediaItemAsWorkbenchBackground,
+} from "../../helpers/workbench";
 
 export function VideoPanelContainer(props: PanelProps) {
   const { t } = useTwickI18n();
   const [activeSource, setActiveSource] = useState<"user" | "public">("user");
+  const { editor, totalDuration } = useTimelineContext();
+  const isWorkbenchMode = isDigitalHumanSalesWorkbench(props.studioConfig?.workbench);
+
+  const handleSetAsBackground = async (item: MediaItem) => {
+    await setMediaItemAsWorkbenchBackground({
+      editor,
+      item,
+      videoResolution: props.videoResolution,
+      durationSec: totalDuration,
+    });
+  };
+
   return (
     <>
       <div className="panel-section">
@@ -37,15 +54,23 @@ export function VideoPanelContainer(props: PanelProps) {
       </div>
 
       {activeSource === "user" ? (
-        <VideoUserAssetsSection {...props} />
+        <VideoUserAssetsSection
+          {...props}
+          onSetAsBackground={isWorkbenchMode ? handleSetAsBackground : undefined}
+        />
       ) : (
-        <VideoPublicAssetsSection />
+        <VideoPublicAssetsSection
+          videoResolution={props.videoResolution}
+          onSetAsBackground={isWorkbenchMode ? handleSetAsBackground : undefined}
+        />
       )}
     </>
   );
 }
 
-function VideoUserAssetsSection(props: PanelProps) {
+function VideoUserAssetsSection(
+  props: PanelProps & { onSetAsBackground?: (item: MediaItem) => void },
+) {
   const { t } = useTwickI18n();
   const { addItem } = useMedia("video");
   const mediaManager = getMediaManager();
@@ -154,6 +179,7 @@ function VideoUserAssetsSection(props: PanelProps) {
       <VideoPanel
         items={visibleItems}
         onItemSelect={handleSelection}
+        onSetAsBackground={props.onSetAsBackground}
         onFileUpload={handleFileUpload}
         isLoading={isLoading}
         acceptFileTypes={acceptFileTypes}
@@ -165,9 +191,16 @@ function VideoUserAssetsSection(props: PanelProps) {
   );
 }
 
-function VideoPublicAssetsSection() {
+function VideoPublicAssetsSection({
+  videoResolution,
+  onSetAsBackground,
+}: {
+  videoResolution: PanelProps["videoResolution"];
+  onSetAsBackground?: (item: MediaItem) => void;
+}) {
   const { t } = useTwickI18n();
   const assetLibrary = getAssetLibrary();
+  const { editor, totalDuration } = useTimelineContext();
   const [providerConfigs, setProviderConfigs] = useState<AssetProviderConfig[]>(
     [],
   );
@@ -299,6 +332,17 @@ function VideoPublicAssetsSection() {
         onItemSelect={() => {
           // Selection handled via timeline; public items behave same as user items
         }}
+        onSetAsBackground={
+          onSetAsBackground
+            ? (item) =>
+                setMediaItemAsWorkbenchBackground({
+                  editor,
+                  item,
+                  videoResolution,
+                  durationSec: totalDuration,
+                })
+            : undefined
+        }
         onFileUpload={() => { }}
         isLoading={isPublicLoading}
         acceptFileTypes={[]}

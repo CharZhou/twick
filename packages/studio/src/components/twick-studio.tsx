@@ -59,6 +59,7 @@ export function TwickStudio({ studioConfig }: { studioConfig?: StudioConfig }) {
   const twickStudiConfig: StudioConfig = useMemo(
     () => ({
       canvasMode: true,
+      showHeader: true,
       ...(studioConfig || {}),
       hiddenTools: [
         ...(studioConfig?.hiddenTools || []),
@@ -86,15 +87,17 @@ export function TwickStudio({ studioConfig }: { studioConfig?: StudioConfig }) {
         >
           <div className="studio-container">
             {/* Header */}
-            <StudioHeader
-              setVideoResolution={setVideoResolution}
-              onNewProject={onNewProject}
-              onLoadProject={onLoadProject}
-              onSaveProject={onSaveProject}
-              onExportVideo={onExportVideo}
-              onExportCaptions={onExportCaptions}
-              onExportChapters={onExportChapters}
-            />
+            {twickStudiConfig.showHeader !== false ? (
+              <StudioHeader
+                setVideoResolution={setVideoResolution}
+                onNewProject={onNewProject}
+                onLoadProject={onLoadProject}
+                onSaveProject={onSaveProject}
+                onExportVideo={onExportVideo}
+                onExportCaptions={onExportCaptions}
+                onExportChapters={onExportChapters}
+              />
+            ) : null}
             {/* Main Content */}
             <div className="studio-content">
               {/* Left Toolbar */}

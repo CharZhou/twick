@@ -25,7 +25,7 @@
  * ```
  */
 
-import { Wand2, Plus } from "lucide-react";
+import { Wand2, Plus, Image as ImageIcon } from "lucide-react";
 import {
   TIMELINE_DROP_MEDIA_TYPE,
   type MediaItem,
@@ -37,6 +37,7 @@ import UrlInput from "../shared/url-input";
 export function ImagePanel({
   items,
   onItemSelect,
+  onSetAsBackground,
   onUrlAdd,
   isLoading,
   canLoadMore,
@@ -83,6 +84,18 @@ export function ImagePanel({
                 >
                   <Plus className="icon-sm" />
                 </button>
+                {onSetAsBackground ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSetAsBackground(item);
+                    }}
+                    className="media-action-btn"
+                    title={t("common.setAsBackground")}
+                  >
+                    <ImageIcon className="icon-sm" />
+                  </button>
+                ) : null}
               </div>
             </div>
           ))}

@@ -190,6 +190,7 @@ export * from "./helpers/export-project-bundle";
 export * from "./helpers/aether-upload-config";
 export * from "./helpers/chanjing-digital-human.service";
 export * from "./helpers/constant";
+export * from "./helpers/workbench";
 export * from "./types";
 export type {
   CloudUploadProvider,

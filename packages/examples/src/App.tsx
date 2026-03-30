@@ -11,6 +11,7 @@ import ExampleRender  from './pages/example-render';
 import StarterEdu from './pages/starter-edu';
 import StarterDemo from './pages/starter-demo';
 import StarterSocial from './pages/starter-social';
+import DigitalHumanWorkbenchPage from './pages/digital-human-workbench';
 
 const router = createBrowserRouter([
   {
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
   {
     path: '/starter/social',
     element: <StarterSocial />,
+  },
+  {
+    path: '/workbench/digital-human',
+    element: <DigitalHumanWorkbenchPage />,
   }
 ]);
 

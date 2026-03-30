@@ -7,6 +7,7 @@ export interface MediaPanelBasePropsCommon {
   isLoading: boolean;
   acceptFileTypes: string[];
   onItemSelect: (item: MediaItem, forceAdd?: boolean) => void;
+  onSetAsBackground?: (item: MediaItem) => void;
   onFileUpload: (fileData: { file: File; blobUrl: string }) => void;
   canLoadMore?: boolean;
   onLoadMore?: () => void;

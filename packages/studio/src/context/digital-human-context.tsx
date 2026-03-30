@@ -1,5 +1,6 @@
-import { type ReactNode, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import type { Size } from "@twick/timeline";
+import { type ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import type { ProjectJSON, Size } from "@twick/timeline";
+import { useTimelineContext } from "@twick/timeline";
 import { useTwickI18n } from "@twick/video-editor";
 import type {
   DigitalHumanAsset,
@@ -9,6 +10,12 @@ import type {
 } from "../types";
 import { getMediaManager } from "../components/shared";
 import { useMedia } from "./media-context";
+import {
+  getWorkbenchProjectMetadata,
+  getWorkbenchProjectMetadataFromProject,
+  isDigitalHumanSalesWorkbench,
+  mergeWorkbenchProjectMetadata,
+} from "../helpers/workbench";
 
 const DEFAULT_BACKGROUND = "#EDEDED";
 
@@ -101,6 +108,7 @@ export function DigitalHumanComposerProvider({
 }) {
   const { t, language } = useTwickI18n();
   const service = studioConfig?.digitalHumanGenerationService;
+  const { editor, present } = useTimelineContext();
   const mediaManager = getMediaManager();
   const { addItem } = useMedia("video");
 
@@ -122,6 +130,7 @@ export function DigitalHumanComposerProvider({
   const [statusText, setStatusText] = useState("");
   const [error, setError] = useState("");
   const pollingRef = useRef<number | null>(null);
+  const isHydratingFromProjectRef = useRef(false);
 
   const selectedHuman = useMemo(
     () => digitalHumans.find((item) => item.id === selectedHumanId) ?? null,
@@ -146,6 +155,30 @@ export function DigitalHumanComposerProvider({
   useEffect(() => {
     setSpeechLanguage(language === "zh" ? "cn" : "en");
   }, [language]);
+
+  const hydrateFromProject = useCallback(
+    (project?: ProjectJSON | null) => {
+      const workbench = getWorkbenchProjectMetadataFromProject(project);
+      if (!workbench) {
+        return;
+      }
+
+      isHydratingFromProjectRef.current = true;
+      setSelectedHumanId(workbench.avatarId ?? "");
+      setSelectedFigureType(workbench.selectedFigureType ?? "");
+      setSelectedVoiceId(workbench.selectedVoiceId ?? "");
+      setScript(workbench.scriptSnapshot ?? "");
+      setSpeechLanguage(workbench.speechLanguage ?? (language === "zh" ? "cn" : "en"));
+      setQuality(workbench.quality ?? "standard");
+      setSpeed(workbench.speed ?? 1);
+      setShowSubtitles(workbench.showSubtitles ?? true);
+      setBackgroundColor(workbench.backgroundColor ?? DEFAULT_BACKGROUND);
+      Promise.resolve().then(() => {
+        isHydratingFromProjectRef.current = false;
+      });
+    },
+    [language],
+  );
 
   useEffect(() => {
     return () => {
@@ -207,6 +240,24 @@ export function DigitalHumanComposerProvider({
   }, [service, t]);
 
   useEffect(() => {
+    hydrateFromProject(present ?? editor.getProject());
+    // Only hydrate the local composer state on initial mount.
+    // Ongoing edits sync through metadata persistence below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor, hydrateFromProject]);
+
+  useEffect(() => {
+    const handleProjectLoaded = () => {
+      hydrateFromProject(editor.getProject());
+    };
+
+    editor.on("project:loaded", handleProjectLoaded);
+    return () => {
+      editor.off("project:loaded", handleProjectLoaded);
+    };
+  }, [editor, hydrateFromProject]);
+
+  useEffect(() => {
     if (!selectedHuman) {
       return;
     }
@@ -232,6 +283,58 @@ export function DigitalHumanComposerProvider({
       );
     }
   }, [selectedFigureType, selectedHuman, selectedVoiceId, voices]);
+
+  useEffect(() => {
+    if (!isDigitalHumanSalesWorkbench(studioConfig?.workbench)) {
+      return;
+    }
+
+    if (isHydratingFromProjectRef.current) {
+      return;
+    }
+
+    const existingWorkbench = getWorkbenchProjectMetadataFromProject(present);
+
+    const currentMetadata = editor.getMetadata();
+    const nextMetadata = mergeWorkbenchProjectMetadata(currentMetadata, {
+      stepId: existingWorkbench?.stepId,
+      baselineResultId: existingWorkbench?.baselineResultId,
+      sourceProjectDraftUrl: existingWorkbench?.sourceProjectDraftUrl,
+      avatarId: selectedHumanId || undefined,
+      backgroundId: existingWorkbench?.backgroundId,
+      selectedFigureType: selectedFigureType || undefined,
+      selectedVoiceId: selectedVoiceId || undefined,
+      speechLanguage,
+      quality,
+      speed,
+      showSubtitles,
+      backgroundColor,
+      scriptSnapshot: script.trim() || undefined,
+    });
+
+    const nextWorkbench = getWorkbenchProjectMetadata(nextMetadata);
+    if (
+      JSON.stringify(existingWorkbench ?? null) ===
+      JSON.stringify(nextWorkbench ?? null)
+    ) {
+      return;
+    }
+
+    editor.setMetadata(nextMetadata);
+  }, [
+    backgroundColor,
+    editor,
+    present,
+    quality,
+    script,
+    selectedFigureType,
+    selectedHumanId,
+    selectedVoiceId,
+    showSubtitles,
+    speechLanguage,
+    speed,
+    studioConfig?.workbench,
+  ]);
 
   const stopPolling = () => {
     if (pollingRef.current) {
@@ -264,6 +367,17 @@ export function DigitalHumanComposerProvider({
     });
     addItem(item);
     setStatusText(t("digitalHuman.addedToLibrary"));
+
+    if (isDigitalHumanSalesWorkbench(studioConfig?.workbench)) {
+      const nextMetadata = mergeWorkbenchProjectMetadata(editor.getMetadata(), {
+        avatarId: human.id,
+        selectedFigureType: selectedFigure?.type,
+        selectedVoiceId: selectedVoiceId || undefined,
+        scriptSnapshot: script.trim() || undefined,
+        backgroundColor,
+      });
+      editor.setMetadata(nextMetadata);
+    }
   };
 
   const startPolling = (videoId: string, human: DigitalHumanAsset) => {
@@ -403,7 +517,6 @@ export function DigitalHumanComposerProvider({
       selectedHuman,
       selectedHumanId,
       selectedVoiceId,
-      service,
       showSubtitles,
       speechLanguage,
       speed,
